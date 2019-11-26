@@ -168,6 +168,12 @@ extern UInt32 g_repl_cnt;
     int height = 0;
     int round = 0;
 
+    int getHeight();
+    int getRound();
+    void incrementHeight();
+    void incrementRound();
+    void resetRound();
+
 #endif
 
 enum RC
