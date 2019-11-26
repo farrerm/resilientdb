@@ -103,18 +103,20 @@ if [[ ! -z "${pids}" ]] ; then     # Exit processes
 	#echo "${pids[@]}"
 
 	# Exit all child processes
+        if [[ ${os} == "linux-gnu" ]]; then
 	for parent in ${pids} ; do
 		pid=$(ps h --ppid $parent -o pid)
 		if [[ ! -z ${pid} ]] ; then
 	         	sudo kill -15 ${pid}
 	        fi
 	done
-
+        elif [[ ${os} == "darwin"* ]]; then
 	# Exit all parent processes
-	#for pid in ${pids} ; do
+	    for pid in ${pids} ; do
 		#echo ${pid}
-	#	sudo kill -15 ${pid}
-	#done
+		sudo kill -15 ${pid}
+            done
+        fi
 else                              
 	echo "No running processes detected"
 fi
@@ -192,8 +194,7 @@ if $start || $rerun ; then
                     activate
                     tell application "System Events" to keystroke "t" using command down
                     tell application "Terminal" to set custom title of tab 1 of front window to "s${i}"
-                    tell application "Terminal" to do script "docker exec -it s${i} bash -c \
-		      './rundb -nid$((i - 1))';bash" in front window
+                    tell application "Terminal" to do script "docker exec -it s${i} bash -c './rundb -nid$((i - 1))';bash" in front window
                   end tell 
 EOD
 	done
@@ -204,8 +205,7 @@ EOD
                     activate
                     tell application "System Events" to keystroke "t" using command down
                     tell application "Terminal" to set custom title of tab 1 of front window to "c${i}"
-                    tell application "Terminal" to do script "docker exec -it c${i} bash -c \
-		      './runcl -nid$((i + replicas - 1))';bash" in front window
+                    tell application "Terminal" to do script "docker exec -it c${i} bash -c './runcl -nid$((i + replicas - 1))';bash" in front window
                   end tell 
 EOD
         done

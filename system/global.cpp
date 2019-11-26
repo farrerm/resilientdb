@@ -105,6 +105,27 @@ void set_last_valid_txn(uint64_t txn_id)
 	last_valid_txn = txn_id;
 }
 
+#if TENDERMINT
+
+	int getHeight(){
+
+		return height;
+	}
+	int getRound(){
+		return round;
+	}
+	void incrementHeight(){
+		height++;
+	}
+	void incrementRound(){
+		round++;
+	}
+	void resetRound(){
+		round = 0;
+	}
+
+#endif
+
 UInt32 g_server_start_node = 0;
 UInt32 g_this_thread_cnt = ISCLIENT ? g_client_thread_cnt : g_thread_cnt;
 UInt32 g_this_rem_thread_cnt = ISCLIENT ? g_client_rem_thread_cnt : g_rem_thread_cnt;
