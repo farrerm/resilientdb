@@ -163,6 +163,13 @@ extern double g_mpitem;
 extern UInt32 g_repl_type;
 extern UInt32 g_repl_cnt;
 
+#if TENDERMINT
+
+    int height = 0;
+    int round = 0;
+
+#endif
+
 enum RC
 {
     RCOK = 0,
