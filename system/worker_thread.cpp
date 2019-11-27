@@ -1363,8 +1363,9 @@ bool WorkerThread::prepared(PBFTPrepMessage *msg)
  * the height, and reset its round counter to 0. 
  */
 void WorkerThread::new_height() {
-    // Increment height
-    // Reset round to 0
+    resetRound();
+    incrementHeight();
     // Release the locks
+    //unlockBlock();
 }
 #endif
