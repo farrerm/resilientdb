@@ -297,7 +297,7 @@ RC WorkerThread::process_pbft_commit_msg(Message *msg)
 
     // Check if sufficient number of Commit messages have arrived.
     if (committed_local(pcmsg))
-    {
+ {
 #if TIMER_ON
         // End the timer for this client batch.
         server_timer->endTimer(txn_man->hash);
@@ -307,6 +307,8 @@ RC WorkerThread::process_pbft_commit_msg(Message *msg)
         send_execute_msg();
 
         INC_STATS(get_thd_id(), time_commit, get_sys_clock() - txn_man->txn_stats.time_start_commit);
+
+        // Code for new_height()
     }
 
     return RCOK;

@@ -37,6 +37,7 @@ make=false
 replicas=4
 clients=1
 
+kflag="-15"
 dependency="scripts/docker-ifconfig.sh"
 
 os="${OSTYPE}"
@@ -61,6 +62,13 @@ fi
 
 if [ "${2}" = "-c" ] ; then
 	make=true
+fi
+
+if ($sleep || $stop) && $make ; then
+	echo "Incorrect usage. Cannot pass -c option with sleep/start"
+	echo "Exiting..."
+
+	exit 1
 fi
 
 # Check if in the correct directory
@@ -102,19 +110,25 @@ if [[ ! -z "${pids}" ]] ; then     # Exit processes
 
 	#echo "${pids[@]}"
 
+	if [[ ${os} == "darwin"* ]]; then
+		kflag="-9"
+	fi
+
 	# Exit all child processes
-        if [[ ${os} == "linux-gnu" ]]; then
 	for parent in ${pids} ; do
-		pid=$(ps h --ppid $parent -o pid)
-		if [[ ! -z ${pid} ]] ; then
-	         	sudo kill -15 ${pid}
-	        fi
+	    pid=$(ps -ejf | awk -v parent="$parent" '$3 == parent {print $2}')
+	    #pid=$(ps h --ppid $parent -o pid)
+	    if [[ ! -z ${pid} ]] ; then
+	        #echo ${pid}
+	       	sudo kill ${kflag} ${pid}
+	    fi
 	done
-        elif [[ ${os} == "darwin"* ]]; then
-	# Exit all parent processes
-	    for pid in ${pids} ; do
-		#echo ${pid}
-		sudo kill -15 ${pid}
+
+	# Exit all parent processes if OSX
+	if [[ ${os} == "darwin"* ]]; then
+            for parent in ${pids} ; do
+                #echo ${pid}
+       	        sudo kill ${kflag} ${pid}
             done
         fi
 else                              
@@ -159,7 +173,8 @@ if $start ; then
         echo "Spinning up new Docker containers..."
 
 	$(docker-compose up -d)
-	scripts/docker-ifconfig.sh
+	#scripts/docker-ifconfig.sh
+        ${dependency}
 fi
 
 # Build commands to spawn a process per server and autostart ExpoDB(start,rerun)
