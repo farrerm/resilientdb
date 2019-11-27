@@ -17,9 +17,9 @@
 /**
  * Processes an incoming client batch and sends a Pre-prepare message to al replicas.
  *
- * This function assumes that a client sends a batch of transactions and
- * for each transaction in the batch, a separate transaction manager is created.
- * Next, this batch is forwarded to all the replicas as a BatchRequests Message,
+ * This function assumes that a client sends a batch of transactions and 
+ * for each transaction in the batch, a separate transaction manager is created. 
+ * Next, this batch is forwarded to all the replicas as a BatchRequests Message, 
  * which corresponds to the Pre-Prepare stage in the PBFT protocol.
  *
  * @param msg Batch of Transactions of type CientQueryBatch from the client.
@@ -60,10 +60,10 @@ RC WorkerThread::process_client_batch(Message *msg)
  * Process incoming BatchRequests message from the Primary.
  *
  * This function is used by the non-primary or backup replicas to process an incoming
- * BatchRequests message sent by the primary replica. This processing would require
- * sending messages of type PBFTPrepMessage, which correspond to the Prepare phase of
- * the PBFT protocol. Due to network delays, it is possible that a repica may have
- * received some messages of type PBFTPrepMessage and PBFTCommitMessage, prior to
+ * BatchRequests message sent by the primary replica. This processing would require 
+ * sending messages of type PBFTPrepMessage, which correspond to the Prepare phase of 
+ * the PBFT protocol. Due to network delays, it is possible that a repica may have 
+ * received some messages of type PBFTPrepMessage and PBFTCommitMessage, prior to 
  * receiving this BatchRequests message.
  *
  * @param msg Batch of Transactions of type BatchRequests from the primary.
@@ -105,7 +105,6 @@ RC WorkerThread::process_batch(Message *msg)
     INC_STATS(get_thd_id(), time_pre_prepare, timepre);
 
     // Only when BatchRequests message comes after some Prepare message.
-    // NOTE: check received messages.
     for (uint64_t i = 0; i < txn_man->info_prepare.size(); i++)
     {
         // Decrement.
@@ -186,8 +185,8 @@ RC WorkerThread::process_batch(Message *msg)
 /**
  * Processes incoming Prepare message.
  *
- * This functions precessing incoming messages of type PBFTPrepMessage. If a replica
- * received 2f identical Prepare messages from distinct replicas, then it creates
+ * This functions precessing incoming messages of type PBFTPrepMessage. If a replica 
+ * received 2f identical Prepare messages from distinct replicas, then it creates 
  * and sends a PBFTCommitMessage to all the other replicas.
  *
  * @param msg Prepare message of type PBFTPrepMessage from a replica.
@@ -224,8 +223,8 @@ RC WorkerThread::process_pbft_prep_msg(Message *msg)
 /**
  * Checks if the incoming PBFTCommitMessage can be accepted.
  *
- * This functions checks if the hash and view of the commit message matches that of
- * the Pre-Prepare message. Once 2f+1 messages are received it returns a true and
+ * This functions checks if the hash and view of the commit message matches that of 
+ * the Pre-Prepare message. Once 2f+1 messages are received it returns a true and 
  * sets the `is_committed` flag for furtue identification.
  *
  * @param msg PBFTCommitMessage.
@@ -247,25 +246,11 @@ bool WorkerThread::committed_local(PBFTCommitMessage *msg)
     {
         //cout << "hash empty: " << txn_man->get_txn_id() << "\n";
         //fflush(stdout);
-        #if TENDERMINT
-          if (count(txn_man->info_commit.begin(), txn_man->info_commit.end(), msg->return_node)){
-            cout << "Debug: Already got the commit message. " << endl;
-          }
-          else{
-            txn_man->info_commit.push_back(msg->return_node);
-            txn_man->send_pbft_commit_msgs();
-            cout << "gossiping commit works? " << msg->txn_id << endl;
-          }
-        #else
-          cout << "Debug: Tendermint flag failed. " << endl;
-          txn_man->info_commit.push_back(msg->return_node);
-        #endif
-        //NOTE: modification - whether should we pass on commit messages.
+        txn_man->info_commit.push_back(msg->return_node);
         return false;
     }
     else
     {
-        cout << "Debug: my code is useless ;_; " << endl;
         if (!checkMsg(msg))
         {
             // If message did not match.
@@ -289,8 +274,8 @@ bool WorkerThread::committed_local(PBFTCommitMessage *msg)
 /**
  * Processes incoming Commit message.
  *
- * This functions precessing incoming messages of type PBFTCommitMessage. If a replica
- * received 2f+1 identical Commit messages from distinct replicas, then it asks the
+ * This functions precessing incoming messages of type PBFTCommitMessage. If a replica 
+ * received 2f+1 identical Commit messages from distinct replicas, then it asks the 
  * execute-thread to execute all the transactions in this batch.
  *
  * @param msg Commit message of type PBFTCommitMessage from a replica.
@@ -312,7 +297,7 @@ RC WorkerThread::process_pbft_commit_msg(Message *msg)
 
     // Check if sufficient number of Commit messages have arrived.
     if (committed_local(pcmsg))
- {
+    {
 #if TIMER_ON
         // End the timer for this client batch.
         server_timer->endTimer(txn_man->hash);
@@ -322,8 +307,6 @@ RC WorkerThread::process_pbft_commit_msg(Message *msg)
         send_execute_msg();
 
         INC_STATS(get_thd_id(), time_commit, get_sys_clock() - txn_man->txn_stats.time_start_commit);
-
-        // Code for new_height()
     }
 
     return RCOK;
