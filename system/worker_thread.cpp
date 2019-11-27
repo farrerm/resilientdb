@@ -1352,3 +1352,19 @@ bool WorkerThread::prepared(PBFTPrepMessage *msg)
 
     return false;
 }
+
+#if TENDERMINT
+/**
+ * Resets and updates necessary values after a successful voting round 
+ *
+ * This function does the prepares a server for the next voting round
+ * after a successful commit (after receiving 2f precommit messages). 
+ * It will release its lock on the block it was voting on, increment 
+ * the height, and reset its round counter to 0. 
+ */
+void WorkerThread::new_height() {
+    // Increment height
+    // Reset round to 0
+    // Release the locks
+}
+#endif

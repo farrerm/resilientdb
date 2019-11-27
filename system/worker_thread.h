@@ -78,6 +78,10 @@ public:
 #endif
 #endif
 
+#if TENDERMINT
+    void new_height();
+#endif
+
 private:
     uint64_t _thd_txn_id;
     ts_t _curr_ts;
