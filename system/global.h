@@ -165,14 +165,14 @@ extern UInt32 g_repl_cnt;
 
 #if TENDERMINT
 
-    int height = 0;
-    int round = 0;
+extern UInt32 height;
+extern UInt32 tRound;
 
-    int getHeight();
-    int getRound();
-    void incrementHeight();
-    void incrementRound();
-    void resetRound();
+int getHeight();
+int getTround();
+void incrementHeight();
+void incrementTround();
+void resettRound();
 
 #endif
 

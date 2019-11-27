@@ -154,7 +154,7 @@
 #define PBFT 2 
 #define ZYZZYVA 3 
 #define HOTSTUFF 4 
-#define TENDERMINT TRUE
+#define TENDERMINT true
 // Switching on RBFT consensus. 
 // Status: Partial implementation, only for PBFT. 
 #define RBFT_ON false 

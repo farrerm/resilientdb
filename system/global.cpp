@@ -87,6 +87,11 @@ bool g_strict_ppt = STRICT_PPT == 1;
 UInt32 g_field_per_tuple = FIELD_PER_TUPLE;
 UInt32 g_init_parallelism = INIT_PARALLELISM;
 
+//tendermint
+#if TENDERMINT
+UInt32 tRound = 0;
+UInt32 height = 0;
+#endif
 // Client Related Data.
 UInt32 g_client_node_cnt = CLIENT_NODE_CNT;
 UInt32 g_client_thread_cnt = CLIENT_THREAD_CNT;
@@ -112,16 +117,16 @@ void set_last_valid_txn(uint64_t txn_id)
 		return height;
 	}
 	int getRound(){
-		return round;
+		return tRound;
 	}
 	void incrementHeight(){
 		height++;
 	}
 	void incrementRound(){
-		round++;
+		tRound++;
 	}
 	void resetRound(){
-		round = 0;
+		tRound = 0;
 	}
 
 #endif
