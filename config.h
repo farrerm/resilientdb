@@ -150,7 +150,6 @@
 #define WARMUP_TIMER 1 * 60 * BILLION
 // Select the consensus algorithm to run.
 #define CONSENSUS PBFT
-<<<<<<< HEAD
 #define DBFT 1
 #define PBFT 2
 #define ZYZZYVA 3
@@ -211,66 +210,4 @@
 #define M100 1	// 100KB.
 #define M200 2	// 200KB.
 #define M400 3	// 400KB.
-=======
-#define DBFT 1
-#define PBFT 2
-#define ZYZZYVA 3
-#define HOTSTUFF 4
-#define TENDERMINT true
-// Switching on RBFT consensus.
-// Status: Partial implementation, only for PBFT.
-#define RBFT_ON false
-// Select the type of RBFT, (1) RBFT+PBFT, and  (2) RBFT+DBFT
-#define RBFT_ALG RPBFT
-#define RPBFT 1
-#define RDBFT 2
-// Enable or Disable pipeline at primary replica.
-#define ENABLE_PIPELINE true
-// Number of threads to create batches at primary replica.
-#define BATCH_THREADS 2
-// Size of each batch.
-#define BATCH_SIZE 100
-#define BATCH_ENABLE BSET
-#define BSET 1
-#define BUNSET 0
-// Number of transactions to wait for period checkpointing.
-#define TXN_PER_CHKPT 600
-#define EXECUTION_THREAD true
-#define EXECUTE_THD_CNT 1
-#define SIGN_THREADS false
-#define SIGN_THD_CNT 1
-#define CLIENT_BATCH true
-#define CLIENT_RESPONSE_BATCH true
-// To fail non-primary replicas.
-#define LOCAL_FAULT false
-#define NODE_FAIL_CNT 1
-// To allow view changes.
-#define VIEW_CHANGES false
-// The amount of timeout value.
-#define EXE_TIMEOUT  10000000000
-#define CEXE_TIMEOUT 12000000000
-// To turn the timer on.
-#define TIMER_ON false
-//Global variables to choose the encryptation algorithm
-#define USE_CRYPTO true
-#define CRYPTO_METHOD_RSA false //Options RSA,
-#define CRYPTO_METHOD_ED25519 true // Option ED25519
-#define CRYPTO_METHOD_CMAC_AES true // CMAC<AES>
-// Test cases to check basic functioning.
-// Status: Implementation only for PBFT.
-#define TESTING_ON false
-#define TEST_CASE ONLY_PRIMARY_BATCH_EXECUTE
-#define ONLY_PRIMARY_NO_EXECUTE 1
-#define ONLY_PRIMARY_EXECUTE 2
-#define ONLY_PRIMARY_BATCH_EXECUTE 3
-// Message Payload.
-// We allow creation of two different message payloads,
-// to see affects on latency and throughput.
-// These payloads are added to each message.
-#define PAYLOAD_ENABLE false
-#define PAYLOAD M100
-#define M100 1	// 100KB.
-#define M200 2	// 200KB.
-#define M400 3	// 400KB.
->>>>>>> ab51b861ab5b5002b946d1e3d7ee5484324fe0f8
 #endif
