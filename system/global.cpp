@@ -125,7 +125,7 @@ void set_last_valid_txn(uint64_t txn_id)
 	void incrementRound(){
 		tRound++;
 	}
-	void resetRound(){
+	void resettRound(){
 		tRound = 0;
 	}
 

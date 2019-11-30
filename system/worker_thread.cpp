@@ -805,8 +805,11 @@ void WorkerThread::send_execute_msg()
  */
 RC WorkerThread::process_execute_msg(Message *msg)
 {
-    //cout << "EXECUTE " << msg->txn_id << " :: " << get_thd_id() <<"\n";
-    //fflush(stdout);
+    cout << "EXECUTE " << msg->txn_id << " :: " << get_thd_id() <<"\n";
+    fflush(stdout);
+    cout << "Height: " << getHeight() << endl;
+    incrementHeight();
+
 
     uint64_t ctime = get_sys_clock();
 
@@ -910,6 +913,8 @@ RC WorkerThread::process_execute_msg(Message *msg)
 
     // Setting the next expected prepare message id.
     set_expectedExecuteCount(get_batch_size() + msg->txn_id);
+
+    
 
     // End the execute counter.
     INC_STATS(get_thd_id(), time_execute, get_sys_clock() - ctime);
@@ -1363,7 +1368,7 @@ bool WorkerThread::prepared(PBFTPrepMessage *msg)
  * the height, and reset its round counter to 0. 
  */
 void WorkerThread::new_height() {
-    resetRound();
+    resettRound();
     incrementHeight();
     // Release the locks
     //unlockBlock();

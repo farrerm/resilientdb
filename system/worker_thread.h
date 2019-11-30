@@ -36,6 +36,7 @@ public:
     RC process_batch(Message *msg);
     void send_checkpoints(uint64_t txn_id);
     RC process_pbft_chkpt_msg(Message *msg);
+    //void new_height();
 
 #if EXECUTION_THREAD
     void send_execute_msg();
