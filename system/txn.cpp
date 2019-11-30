@@ -468,10 +468,13 @@ void TxnManager::send_pbft_commit_msgs()
         }
         #if TENDERMINT
           //if(i == (g_node_id + 1) % g_node_cnt || i == (g_node_id - 1) % g_node_cnt){
+          /*
           if(i == (g_node_id + 1) % g_node_cnt){
              cout << "sending the commit message " << msg->txn_id << " to " << i << endl;
              dest.push_back(i);
           }
+          */
+          dest.push_back(i);
         #else
           dest.push_back(i);
         #endif

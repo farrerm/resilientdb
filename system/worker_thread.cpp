@@ -1315,7 +1315,7 @@ bool WorkerThread::checkMsg(Message *msg)
  */
 bool WorkerThread::prepared(PBFTPrepMessage *msg)
 {
-    //cout << "Inside PREPARED: " << txn_man->get_txn_id() << "\n";
+    cout << "Inside PREPARED: " << txn_man->get_txn_id() << "\n";
     //fflush(stdout);
 
     // Once prepared is set, no processing for further messages.

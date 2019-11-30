@@ -248,6 +248,7 @@ bool WorkerThread::committed_local(PBFTCommitMessage *msg)
         //cout << "hash empty: " << txn_man->get_txn_id() << "\n";
         //fflush(stdout);
         #if TENDERMINT
+          /*
           if (count(txn_man->info_commit.begin(), txn_man->info_commit.end(), msg->return_node)){
             cout << "Debug: Already got the commit message. " << endl;
           }
@@ -255,7 +256,9 @@ bool WorkerThread::committed_local(PBFTCommitMessage *msg)
             txn_man->info_commit.push_back(msg->return_node);
             txn_man->send_pbft_commit_msgs();
             cout << "gossiping commit works? " << msg->txn_id << endl;
-          }
+          }*/
+          cout << "Debug: Tendermint flag failed. " << endl;
+          txn_man->info_commit.push_back(msg->return_node);
         #else
           cout << "Debug: Tendermint flag failed. " << endl;
           txn_man->info_commit.push_back(msg->return_node);
