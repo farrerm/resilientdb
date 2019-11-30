@@ -809,6 +809,7 @@ RC WorkerThread::process_execute_msg(Message *msg)
     fflush(stdout);
     cout << "Height: " << getHeight() << endl;
     incrementHeight();
+    cout << "Resetting round: " << getTround() << endl;
 
 
     uint64_t ctime = get_sys_clock();

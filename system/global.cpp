@@ -116,7 +116,7 @@ void set_last_valid_txn(uint64_t txn_id)
 
 		return height;
 	}
-	int getRound(){
+	int getTround(){
 		return tRound;
 	}
 	void incrementHeight(){

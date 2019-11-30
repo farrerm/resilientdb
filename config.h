@@ -30,7 +30,7 @@
 #define TIME_PROF_ENABLE false 
 #define FIN_BY_TIME true 
 // Number of transactions each client should send without waiting. 
-#define MAX_TXN_IN_FLIGHT 20000 
+#define MAX_TXN_IN_FLIGHT 10
 #define SERVER_GENERATE_QUERIES false  
 #define MEM_ALLIGN 8 
 #define THREAD_ALLOC false 
@@ -167,7 +167,7 @@
 // Number of threads to create batches at primary replica.  
 #define BATCH_THREADS 2 
 // Size of each batch. 
-#define BATCH_SIZE 100 
+#define BATCH_SIZE 10
 #define BATCH_ENABLE BSET 
 #define BSET 1 
 #define BUNSET 0 
