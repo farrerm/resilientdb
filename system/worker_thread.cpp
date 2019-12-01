@@ -821,7 +821,6 @@ RC WorkerThread::process_execute_msg(Message *msg)
     setLockedRound(-1);
     cout << "Releasing locked value: " << getLockedValue() << endl;
     setLockedValue(-1);
-
     #endif
 
     uint64_t ctime = get_sys_clock();

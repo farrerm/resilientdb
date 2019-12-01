@@ -97,8 +97,19 @@ RC WorkerThread::process_batch(Message *msg)
     add_timer(breq, txn_man->get_hash());
 #endif
 
-    // Send Prepare messages.
-    txn_man->send_pbft_prep_msgs();
+    // Send Prepare messages Tendermint(*Lakhveer) 
+    //check if lockedRound = -1 OR
+    //if lockedBatch has locked on this incoming message in last round
+    //Send preperae message ELSE send nil
+
+    if (getLockedRound() == -1 || getLockedValue() == (int)msg->txn_id){
+        txn_man->send_pbft_prep_msgs();
+
+        //Start clock
+    }
+
+   // Send Prepare messages.
+   // txn_man->send_pbft_prep_msgs();
 
     // End the counter for pre-prepare phase as prepare phase starts next.
     double timepre = get_sys_clock() - cntime;
