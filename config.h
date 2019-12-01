@@ -183,12 +183,12 @@
 #define LOCAL_FAULT false 
 #define NODE_FAIL_CNT 1 
 // To allow view changes. 
-#define VIEW_CHANGES false 
+#define VIEW_CHANGES true 
 // The amount of timeout value. 
 #define EXE_TIMEOUT  10000000000  
 #define CEXE_TIMEOUT 12000000000  
 // To turn the timer on. 
-#define TIMER_ON false 
+#define TIMER_ON true
 //Global variables to choose the encryptation algorithm 
 #define USE_CRYPTO true 
 #define CRYPTO_METHOD_RSA false //Options RSA,  

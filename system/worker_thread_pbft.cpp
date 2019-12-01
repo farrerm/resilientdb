@@ -211,6 +211,12 @@ RC WorkerThread::process_pbft_prep_msg(Message *msg)
     if (prepared(pmsg))
     {
         // Send Commit messages.
+        #if TENDERMINT
+            setLockedRound((int)tRound);
+            setLockedValue((int)msg->txn_id);
+            cout << "Locking round: " << getLockedRound() << endl;
+            cout << "Locking value: " << getLockedValue() << endl;
+        #endif
         txn_man->send_pbft_commit_msgs();
 
         // End the prepare counter.

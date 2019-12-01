@@ -91,6 +91,8 @@ UInt32 g_init_parallelism = INIT_PARALLELISM;
 #if TENDERMINT
 UInt32 tRound = 0;
 UInt32 height = 0;
+int lockedRound = -1;
+int lockedValue = -1;
 #endif
 // Client Related Data.
 UInt32 g_client_node_cnt = CLIENT_NODE_CNT;
@@ -112,11 +114,11 @@ void set_last_valid_txn(uint64_t txn_id)
 
 #if TENDERMINT
 
-	int getHeight(){
+	UInt32 getHeight(){
 
 		return height;
 	}
-	int getTround(){
+	UInt32 getTround(){
 		return tRound;
 	}
 	void incrementHeight(){
@@ -128,6 +130,19 @@ void set_last_valid_txn(uint64_t txn_id)
 	void resettRound(){
 		tRound = 0;
 	}
+	int getLockedRound(){
+		return lockedRound;
+	}
+	int getLockedValue(){
+		return lockedValue;
+	}
+	void setLockedRound(int lround){
+		lockedRound = lround;
+	}
+	void setLockedValue(int repTxn){
+		lockedValue = repTxn;
+	}
+
 
 #endif
 

@@ -167,12 +167,19 @@ extern UInt32 g_repl_cnt;
 
 extern UInt32 height;
 extern UInt32 tRound;
+extern int lockedRound;
+extern int lockedValue;
 
-int getHeight();
-int getTround();
+UInt32 getHeight();
+UInt32 getTround();
 void incrementHeight();
 void incrementTround();
 void resettRound();
+int getLockedRound();
+int getLockedValue();
+void setLockedRound(int lround);
+void setLockedValue(int repTxn);
+
 
 #endif
 

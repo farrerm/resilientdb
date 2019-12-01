@@ -233,7 +233,7 @@ uint64_t WorkerThread::get_next_txn_id()
 /* This function focibly fails non-primary replicas. */
 void WorkerThread::fail_nonprimary()
 {
-    if (g_node_id > g_min_invalid_nodes)
+   /* if (g_node_id > g_min_invalid_nodes)
     {
         if (g_node_id - num_nodes_to_fail <= g_min_invalid_nodes)
         {
@@ -245,11 +245,11 @@ void WorkerThread::fail_nonprimary()
                 {
                     cout << "FAILING!!!";
                     fflush(stdout);
-                    assert(0);
+                   // assert(0);
                 }
             }
         }
-    }
+    }*/
 }
 
 #endif
@@ -357,7 +357,7 @@ void WorkerThread::check_switch_view()
 desired batch. */
 void WorkerThread::fail_primary(Message *msg, uint64_t batch_to_fail)
 {
-    if (g_node_id == 0 && msg->txn_id > batch_to_fail)
+  /*  if (g_node_id == 0 && msg->txn_id > batch_to_fail)
     {
         uint64_t count = 0;
         while (true)
@@ -368,7 +368,7 @@ void WorkerThread::fail_primary(Message *msg, uint64_t batch_to_fail)
                 assert(0);
             }
         }
-    }
+    }*/
 }
 
 void WorkerThread::store_batch_msg(BatchRequests *breq)
@@ -807,10 +807,22 @@ RC WorkerThread::process_execute_msg(Message *msg)
 {
     cout << "EXECUTE " << msg->txn_id << " :: " << get_thd_id() <<"\n";
     fflush(stdout);
-    cout << "Height: " << getHeight() << endl;
+    
+
+    #if TENDERMINT
     incrementHeight();
+    cout << "Height: " << getHeight() << endl;
+
+
+    resettRound();
     cout << "Resetting round: " << getTround() << endl;
 
+    cout << "Releasing locked round: " << getLockedRound() << endl;
+    setLockedRound(-1);
+    cout << "Releasing locked value: " << getLockedValue() << endl;
+    setLockedValue(-1);
+
+    #endif
 
     uint64_t ctime = get_sys_clock();
 
