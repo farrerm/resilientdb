@@ -896,6 +896,13 @@ RC WorkerThread::process_execute_msg(Message *msg)
 
     crsp->copy_from_txn(txn_man);
 
+    #if TENDERMINT
+    //uint64_t batch_id_test = txn_man->get_batch_id(); //always 0.
+    uint64_t txn_id_test = txn_man->get_txn_id();
+    //NOTE: msg->txn_id is always less then txn_man->txn_id by 1.
+    cout << "txn_id in txn_man is : " <<txn_id_test << " . And txn_id in msg is : " << msg->txn_id << endl;
+    #endif
+
     vector<string> emptyvec;
     vector<uint64_t> dest;
     dest.push_back(txn_man->client_id);
@@ -1315,7 +1322,7 @@ bool WorkerThread::checkMsg(Message *msg)
  */
 bool WorkerThread::prepared(PBFTPrepMessage *msg)
 {
-    cout << "Inside PREPARED: " << txn_man->get_txn_id() << "\n";
+    //cout << "Inside PREPARED: " << txn_man->get_txn_id() << "\n";
     //fflush(stdout);
 
     // Once prepared is set, no processing for further messages.
@@ -1330,24 +1337,24 @@ bool WorkerThread::prepared(PBFTPrepMessage *msg)
         // Store the message.
         //NOTE: modification - whether should we pass on the prepare messages.
         //NOTE: return_node is defined in message.cpp; which should be g_node_id a.k.a. the sender;
-        #if TENDERMINT
-          if (count(txn_man->info_prepare.begin(), txn_man->info_prepare.end(), msg->return_node)){
-            cout << "Debug: Already got the prepare messages. " << endl;
-          }
-          else{
-            txn_man->info_prepare.push_back(msg->return_node);
-            txn_man->send_pbft_prep_msgs();
-            cout << "gossiping prepare works?" << msg->txn_id << endl;
-          }
-        #else
-          cout << "Debug: Tendermint flag failed. " << endl;
-          txn_man->info_prepare.push_back(msg->return_node);
-        #endif
-
+        txn_man->info_prepare.push_back(msg->return_node);
         return false;
     }
     else
     {
+        #if TENDERMINT
+          if (count(txn_man->info_prepare.begin(), txn_man->info_prepare.end(), msg->return_node)){
+            cout << "Already got the prepare message " << msg->txn_id << " from " << msg->return_node << endl;
+          }
+          else{
+            txn_man->sent_prep.push_back(msg->return_node);
+            txn_man->info_prepare.push_back(msg->return_node);
+            //txn_man->pass_pbft_prep_msgs(msg);
+            txn_man->send_pbft_prep_msgs();
+            cout << "Received message " << msg->txn_id << " from " << msg->return_node << ", passing on now." << endl;
+          }
+        #endif
+
         if (!checkMsg(msg))
         {
             // If message did not match.
@@ -1361,6 +1368,9 @@ bool WorkerThread::prepared(PBFTPrepMessage *msg)
     uint64_t prep_cnt = txn_man->decr_prep_rsp_cnt();
     if (prep_cnt == 0)
     {
+        #if TENDERMINT
+        cout << "Worker_thread: I am officially prepared, " << txn_man->get_txn_id() << endl;
+        #endif
         txn_man->set_prepared();
         return true;
     }

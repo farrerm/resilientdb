@@ -427,19 +427,55 @@ void TxnManager::send_pbft_prep_msgs()
         }
 
         #if TENDERMINT
-          //if(i == (g_node_id + 1) % g_node_cnt || i == (g_node_id - 1) % g_node_cnt){
-          if(i == (g_node_id + 1) % g_node_cnt){
-             cout << "sending the prepare message " << msg->txn_id << " to " << i << endl;
+          if(i == (g_node_id + 1) % g_node_cnt || i == (g_node_id - 1) % g_node_cnt){
+          //if(i == (g_node_id + 1) % g_node_cnt){
+             cout << "sending the prepare message " << pmsg->txn_id << " to " << i << endl;
              dest.push_back(i);
+             sent_prep.push_back(i);
           }
         #else
           dest.push_back(i);
         #endif
     }
-
+    #if TENDERMINT
+    /*
+    cout << "Receipients: ";
+    for(uint64_t i=0; i < dest.size(); i++){
+      cout <<  dest.at(i) << " ";
+    }
+    cout << endl;*/
+    #endif
     msg_queue.enqueue(get_thd_id(), pmsg, emptyvec, dest);
     dest.clear();
 }
+
+#if TENDERMINT
+void TxnManager::pass_pbft_prep_msgs(PBFTPrepMessage* pmsg){
+  vector<string> emptyvec;
+  vector<uint64_t> dest;
+  for (uint64_t i = 0; i < g_node_cnt; i++)
+  {
+      if (i == g_node_id)
+      {
+          continue;
+      }
+
+      #if TENDERMINT
+        //if(i == (g_node_id + 1) % g_node_cnt || i == (g_node_id - 1) % g_node_cnt){
+        if(i == (g_node_id + 1) % g_node_cnt){
+           cout << "passing the prepare message " << pmsg->txn_id << " sent by " << pmsg->return_node << " to " << i << endl;
+           dest.push_back(i);
+           sent_prep.push_back(i);
+        }
+      #else
+        dest.push_back(i);
+      #endif
+  }
+  msg_queue.enqueue(get_thd_id(), pmsg, emptyvec, dest);
+  dest.clear();
+}
+#endif
+
 
 //broadcasts commit message to all nodes
 void TxnManager::send_pbft_commit_msgs()

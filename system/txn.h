@@ -140,6 +140,10 @@ public:
 
     uint64_t prep_rsp_cnt;
     vector<uint64_t> info_prepare;
+    #if TENDERMINT
+    vector<uint64_t> sent_prep;
+    void pass_pbft_prep_msgs(PBFTPrepMessage* pmsg);
+    #endif
 
     uint64_t decr_prep_rsp_cnt();
     uint64_t get_prep_rsp_cnt();

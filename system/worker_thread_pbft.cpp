@@ -109,9 +109,15 @@ RC WorkerThread::process_batch(Message *msg)
     for (uint64_t i = 0; i < txn_man->info_prepare.size(); i++)
     {
         // Decrement.
+        #if TENDERMINT
+        cout << "Counting message: " << breq->txn_id << " from "  << txn_man->info_prepare.at(i) << endl;
+        #endif
         uint64_t num_prep = txn_man->decr_prep_rsp_cnt();
         if (num_prep == 0)
         {
+            #if TENDERMINT
+            cout << "DebugPBFT: I am officially prepared, " << breq->txn_id << endl;
+            #endif
             txn_man->set_prepared();
             break;
         }
@@ -211,6 +217,9 @@ RC WorkerThread::process_pbft_prep_msg(Message *msg)
     // Check if sufficient number of Prepare messages have arrived.
     if (prepared(pmsg))
     {
+        #if TENDERMINT
+        cout << "Ready to send commit. The index: " << pmsg->index << " ,and the prepare message sender is " << pmsg->return_node << endl;
+        #endif
         // Send Commit messages.
         txn_man->send_pbft_commit_msgs();
 
@@ -257,10 +266,8 @@ bool WorkerThread::committed_local(PBFTCommitMessage *msg)
             txn_man->send_pbft_commit_msgs();
             cout << "gossiping commit works? " << msg->txn_id << endl;
           }*/
-          cout << "Debug: Tendermint flag failed. " << endl;
           txn_man->info_commit.push_back(msg->return_node);
         #else
-          cout << "Debug: Tendermint flag failed. " << endl;
           txn_man->info_commit.push_back(msg->return_node);
         #endif
         //NOTE: modification - whether should we pass on commit messages.
@@ -268,7 +275,6 @@ bool WorkerThread::committed_local(PBFTCommitMessage *msg)
     }
     else
     {
-        cout << "Debug: my code is useless ;_; " << endl;
         if (!checkMsg(msg))
         {
             // If message did not match.
