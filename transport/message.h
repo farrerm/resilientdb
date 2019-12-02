@@ -28,6 +28,13 @@ public:
     uint64_t batch_id;
     uint64_t return_node_id;
 
+//If tendermint (*Lakhveer )
+    UInt32 height;
+    UInt32 tRound;
+    int lockedRound;
+    int lockedValue;
+
+
     uint64_t wq_time;
     uint64_t mq_time;
     uint64_t ntwk_time;

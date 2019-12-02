@@ -820,6 +820,7 @@ RC WorkerThread::process_execute_msg(Message *msg)
     cout << "Releasing locked round: " << getLockedRound() << endl;
     setLockedRound(-1);
     cout << "Releasing locked value: " << getLockedValue() << endl;
+    cout << "========================\n";
     setLockedValue(-1);
     #endif
 
