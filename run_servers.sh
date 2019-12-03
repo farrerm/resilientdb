@@ -194,7 +194,8 @@ if $start || $rerun ; then
                     activate
                     tell application "System Events" to keystroke "t" using command down
                     tell application "Terminal" to set custom title of tab 1 of front window to "s${i}"
-                    tell application "Terminal" to do script "docker exec -it s${i} bash -c './rundb -nid$((i - 1))';bash" in front window
+                    tell application "Terminal" to do script "docker exec -it s${i} bash -c \
+		      './rundb -nid$((i - 1))';bash" in front window
                   end tell 
 EOD
 	done
@@ -205,7 +206,8 @@ EOD
                     activate
                     tell application "System Events" to keystroke "t" using command down
                     tell application "Terminal" to set custom title of tab 1 of front window to "c${i}"
-                    tell application "Terminal" to do script "docker exec -it c${i} bash -c './runcl -nid$((i + replicas - 1))';bash" in front window
+                    tell application "Terminal" to do script "docker exec -it c${i} bash -c \
+		      './runcl -nid$((i + replicas - 1))';bash" in front window
                   end tell 
 EOD
         done
