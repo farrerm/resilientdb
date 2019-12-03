@@ -431,19 +431,17 @@ void TxnManager::send_pbft_prep_msgs()
           //if(i == (g_node_id + 1) % g_node_cnt){
              cout << "sending the prepare message " << pmsg->txn_id << " to " << i << endl;
              dest.push_back(i);
-             sent_prep.push_back(i);
           }
         #else
           dest.push_back(i);
         #endif
     }
     #if TENDERMINT
-    /*
-    cout << "Receipients: ";
-    for(uint64_t i=0; i < dest.size(); i++){
-      cout <<  dest.at(i) << " ";
+    cout << "Sent_prep: ";
+    for(uint64_t i=0; i < sent_prep.size(); i++){
+      cout <<  sent_prep.at(i) << " ";
     }
-    cout << endl;*/
+    cout << endl;
     #endif
     msg_queue.enqueue(get_thd_id(), pmsg, emptyvec, dest);
     dest.clear();
@@ -461,16 +459,24 @@ void TxnManager::pass_pbft_prep_msgs(PBFTPrepMessage* pmsg){
       }
 
       #if TENDERMINT
-        //if(i == (g_node_id + 1) % g_node_cnt || i == (g_node_id - 1) % g_node_cnt){
-        if(i == (g_node_id + 1) % g_node_cnt){
-           cout << "passing the prepare message " << pmsg->txn_id << " sent by " << pmsg->return_node << " to " << i << endl;
-           dest.push_back(i);
-           sent_prep.push_back(i);
+        if(i == (g_node_id + 1) % g_node_cnt || i == (g_node_id - 1) % g_node_cnt){
+        //if(i == (g_node_id + 1) % g_node_cnt){
+          if (!count(sent_prep.begin(), sent_prep.end(), pmsg->return_node)){
+            cout << "passing the prepare message " << pmsg->txn_id << " sent by " << pmsg->return_node << " to " << i << endl;
+            dest.push_back(i);
+          }
         }
       #else
         dest.push_back(i);
       #endif
   }
+  #if TENDERMINT
+  cout << "Sent_prep: ";
+  for(uint64_t i=0; i < sent_prep.size(); i++){
+    cout <<  sent_prep.at(i) << " ";
+  }
+  cout << endl;
+  #endif
   msg_queue.enqueue(get_thd_id(), pmsg, emptyvec, dest);
   dest.clear();
 }
@@ -531,6 +537,7 @@ void TxnManager::release_all_messages(uint64_t txn_id)
     else if ((txn_id + 1) % get_batch_size() == 0)
     {
         info_prepare.clear();
+        sent_prep.clear();
         info_commit.clear();
     }
 }

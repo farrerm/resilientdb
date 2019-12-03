@@ -1335,20 +1335,17 @@ bool WorkerThread::prepared(PBFTPrepMessage *msg)
     if (txn_man->get_hash().empty())
     {
         // Store the message.
-        //NOTE: modification - whether should we pass on the prepare messages.
-        //NOTE: return_node is defined in message.cpp; which should be g_node_id a.k.a. the sender;
         txn_man->info_prepare.push_back(msg->return_node);
         return false;
     }
     else
     {
         #if TENDERMINT
-          if (count(txn_man->info_prepare.begin(), txn_man->info_prepare.end(), msg->return_node)){
+          if (count(txn_man->sent_prep.begin(), txn_man->sent_prep.end(), msg->return_node)){
             cout << "Already got the prepare message " << msg->txn_id << " from " << msg->return_node << endl;
           }
           else{
             txn_man->sent_prep.push_back(msg->return_node);
-            txn_man->info_prepare.push_back(msg->return_node);
             //txn_man->pass_pbft_prep_msgs(msg);
             txn_man->send_pbft_prep_msgs();
             cout << "Received message " << msg->txn_id << " from " << msg->return_node << ", passing on now." << endl;
