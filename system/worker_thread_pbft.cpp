@@ -108,18 +108,7 @@ RC WorkerThread::process_batch(Message *msg)
         //Start clock
     }
 
-    //we got 2f +1 prepare messages then, 
-    //check if:
-        // - lockedvalue == v
-        // - locked round <= vr
-        //Send preperae message
-        //L29 on pseudocode
-    else if(txn_man->is_prepared()){
-        if (getLockedRound() <= msg->lockedRound || getLockedValue() == msg->lockedValue){
-             txn_man->send_pbft_prep_msgs();
-        }
-    }
-
+    
     // End the counter for pre-prepare phase as prepare phase starts next.
     double timepre = get_sys_clock() - cntime;
     INC_STATS(get_thd_id(), time_pre_prepare, timepre);
@@ -233,11 +222,21 @@ RC WorkerThread::process_pbft_prep_msg(Message *msg)
     {
         // Send Commit messages.
         #if TENDERMINT
-            setLockedRound((int)tRound);
-            setLockedValue((int)msg->txn_id);
-            cout << "Locking round: " << getLockedRound() << endl;
-            cout << "Locking value: " << getLockedValue() << endl;
+    //we got 2f +1 prepare messages then, 
+    //check if:
+        // - lockedvalue == v
+        // - locked round <= vr
+        //Send preperae message
+        //L29 on pseudocode
+        if (getLockedRound() <= msg->lockedRound || getLockedValue() == (int)msg->txn_id){
+             txn_man->send_pbft_prep_msgs();
+        }
+        setLockedRound((int)tRound);
+        setLockedValue((int)msg->txn_id);
+        cout << "Locking round: " << getLockedRound() << endl;
+        cout << "Locking value: " << getLockedValue() << endl;
         #endif
+        
         txn_man->send_pbft_commit_msgs();
 
         // End the prepare counter.
