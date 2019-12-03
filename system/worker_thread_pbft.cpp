@@ -101,19 +101,24 @@ RC WorkerThread::process_batch(Message *msg)
     //if lockedBatch has locked on this incoming message in last round
     //Send preperae message ELSE send nil
     //L23 on pseudo code
+
+    
     if (getLockedRound() == -1 || getLockedValue() == (int)msg->txn_id){
         txn_man->send_pbft_prep_msgs();
         //Start clock
     }
 
+    //we got 2f +1 prepare messages then, 
     //check if:
         // - lockedvalue == v
         // - locked round <= vr
         //Send preperae message
         //L29 on pseudocode
-    else if(getLockedRound() <= msg->lockedRound || getLockedValue() == msg->lockedValue){
+    else if(txn_man->is_prepared()){
+        if (getLockedRound() <= msg->lockedRound || getLockedValue() == msg->lockedValue){
              txn_man->send_pbft_prep_msgs();
         }
+    }
 
     // End the counter for pre-prepare phase as prepare phase starts next.
     double timepre = get_sys_clock() - cntime;
