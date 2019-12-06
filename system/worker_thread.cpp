@@ -822,6 +822,50 @@ RC WorkerThread::process_execute_msg(Message *msg)
     cout << "Releasing locked value: " << getLockedValue() << endl;
     cout << "========================\n";
     setLockedValue(-1);
+
+    uint64_t currView = get_current_view(get_thd_id());
+
+    uint64_t nextView = (currView + 1) % g_node_cnt; 
+
+    set_current_view(get_thd_id(), nextView);
+
+        // Reset the views for different threads.
+        //uint64_t total_thds = g_batch_threads + g_rem_thread_cnt + 2;
+       // for (uint64_t i = 0; i < total_thds; i++)
+        //{
+          //  set_newView(i, true);
+        //}
+
+        // Need to ensure that all the threads of the new primary are ready.
+   /*     uint64_t count = 0;
+        bool lflag[total_thds] = {false};
+        while (true)
+        {
+            for (uint64_t i = 0; i < total_thds; i++)
+            {
+                bool nchange = get_newView(i);
+                if (!nchange && !lflag[i])
+                {
+                    count++;
+                    lflag[i] = true;
+                }
+            }
+
+            if (count == total_thds)
+            {
+                break;
+            }
+        }*/
+
+
+    //set_view(nextView);
+    //set_current_view(get_thd_id(), nextView);
+
+   //if((int)get_view() == (int)g_node_id){
+     //   cout << "I'm the primary!" << endl;
+       // cout << "Height = " << getHeight();
+    //}
+
     #endif
 
     uint64_t ctime = get_sys_clock();

@@ -27,8 +27,19 @@
  */
 RC WorkerThread::process_client_batch(Message *msg)
 {
+    //uint64_t currView = get_current_view(get_thd_id());
+
+    //uint64_t nextView = (currView + 1) % g_node_cnt; 
+
+    set_current_view(get_thd_id(), g_node_id);
+
     //printf("ClientQueryBatch: %ld, THD: %ld :: CL: %ld :: RQ: %ld\n",msg->txn_id, get_thd_id(), msg->return_node_id, clbtch->cqrySet[0]->requests[0]->key);
     //fflush(stdout);
+	cout << "Processing client batch for height " << getHeight() << endl;
+
+	cout << "My Node ID is: " << g_node_id << endl;
+
+	cout << "I process it because I am the primary." << endl;
 
     ClientQueryBatch *clbtch = (ClientQueryBatch *)msg;
 
@@ -71,6 +82,9 @@ RC WorkerThread::process_client_batch(Message *msg)
  */
 RC WorkerThread::process_batch(Message *msg)
 {
+    
+	//set_current_view(get_thd_id(), msg->return_node_id);
+
     uint64_t cntime = get_sys_clock();
 
     BatchRequests *breq = (BatchRequests *)msg;

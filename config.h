@@ -45,7 +45,7 @@
 #define MAX_TPORT_NAME 128 
 #define MSG_SIZE 128 
 #define HEADER_SIZE sizeof(uint32_t)*2 
-#define MSG_TIMEOUT 5000000000UL  // in ns 
+#define MSG_TIMEOUT 500000000000UL  // in ns 
 #define NETWORK_TEST false 
 #define NETWORK_DELAY_TEST false 
 #define NETWORK_DELAY 0UL 
@@ -177,18 +177,18 @@
 #define EXECUTE_THD_CNT 1 
 #define SIGN_THREADS false 
 #define SIGN_THD_CNT 1 
-#define CLIENT_BATCH true 
+#define CLIENT_BATCH true
+
 #define CLIENT_RESPONSE_BATCH true 
 // To fail non-primary replicas. 
 #define LOCAL_FAULT false 
-#define NODE_FAIL_CNT 1 
-// To allow view changes. 
-#define VIEW_CHANGES true 
+// To allow view changes.
+#define VIEW_CHANGES false
 // The amount of timeout value. 
-#define EXE_TIMEOUT  10000000000  
-#define CEXE_TIMEOUT 12000000000  
+#define EXE_TIMEOUT  1000000000000  
+#define CEXE_TIMEOUT 1200000000000  
 // To turn the timer on. 
-#define TIMER_ON true
+#define TIMER_ON false
 //Global variables to choose the encryptation algorithm 
 #define USE_CRYPTO true 
 #define CRYPTO_METHOD_RSA false //Options RSA,  

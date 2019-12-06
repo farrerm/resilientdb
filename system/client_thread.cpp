@@ -228,6 +228,29 @@ RC ClientThread::run()
 			bmsg = (ClientQueryBatch *)mssg;
 			bmsg->init();
 			addMore = 0;
+
+
+    //if((int)get_view() == (int)g_node_id){
+        cout << "Primary: " << get_view() << endl;
+        cout << "Height = " << getHeight() << endl;
+
+        //cout << " g node count : " << g_node_cnt << endl;
+       
+        uint64_t currView = get_view();
+        cout << "currView: " << currView << endl;
+      
+
+       	 	//set_newView(get_thd_id(), true);
+			
+
+    		uint64_t nextView = (currView + 1) % g_node_cnt; 
+
+    		set_view(nextView);
+
+    		set_current_view(get_thd_id(), nextView);
+
+    		cout << "nextView: " << nextView << endl;
+    //}
 		}
 
 #endif // Batch Enable
