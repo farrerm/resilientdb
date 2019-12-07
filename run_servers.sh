@@ -34,8 +34,8 @@ stop=false
 
 make=false
 
-replicas=4
-clients=1
+replicas=0
+clients=0
 
 dependency="scripts/docker-ifconfig.sh"
 
@@ -86,6 +86,8 @@ if ! hash docker 2> /dev/null; then
 fi
 
 # Check for existing/running processes (start,rerun,sleep,stop)
+replicas=$(docker ps --format '{{.Names}}' | grep -c 's[0-9]*')
+clients=$(docker ps --format '{{.Names}}' | grep -c 'c[0-9]*')
 pids=$(ps -ef | grep -E "./run(db|cl) -nid[0-9]+" | sort -r | awk '{print $2}')
 if [[ ! -z "${pids}" ]] ; then     # Exit processes 
 

@@ -30,7 +30,7 @@
 #define TIME_PROF_ENABLE false 
 #define FIN_BY_TIME true 
 // Number of transactions each client should send without waiting. 
-#define MAX_TXN_IN_FLIGHT 10
+#define MAX_TXN_IN_FLIGHT 20000 
 #define SERVER_GENERATE_QUERIES false  
 #define MEM_ALLIGN 8 
 #define THREAD_ALLOC false 
@@ -154,7 +154,6 @@
 #define PBFT 2 
 #define ZYZZYVA 3 
 #define HOTSTUFF 4 
-#define TENDERMINT true
 // Switching on RBFT consensus. 
 // Status: Partial implementation, only for PBFT. 
 #define RBFT_ON false 
@@ -167,7 +166,7 @@
 // Number of threads to create batches at primary replica.  
 #define BATCH_THREADS 2 
 // Size of each batch. 
-#define BATCH_SIZE 10
+#define BATCH_SIZE 100 
 #define BATCH_ENABLE BSET 
 #define BSET 1 
 #define BUNSET 0 
@@ -183,12 +182,12 @@
 #define LOCAL_FAULT false 
 #define NODE_FAIL_CNT 1 
 // To allow view changes. 
-#define VIEW_CHANGES true 
+#define VIEW_CHANGES false 
 // The amount of timeout value. 
 #define EXE_TIMEOUT  10000000000  
 #define CEXE_TIMEOUT 12000000000  
 // To turn the timer on. 
-#define TIMER_ON true
+#define TIMER_ON false 
 //Global variables to choose the encryptation algorithm 
 #define USE_CRYPTO true 
 #define CRYPTO_METHOD_RSA false //Options RSA,  
