@@ -408,6 +408,8 @@ void TxnManager::send_pbft_prep_msgs()
     Message *msg = Message::create_message(this, PBFT_PREP_MSG);
     PBFTPrepMessage *pmsg = (PBFTPrepMessage *)msg;
 
+    cout << "Sending prepare messages: " << pmsg->txn_id << "From: " << g_node_id << endl;
+
 #if LOCAL_FAULT == true || VIEW_CHANGES
     if (get_prep_rsp_cnt() > 0)
     {
@@ -438,6 +440,8 @@ void TxnManager::send_pbft_commit_msgs()
 
     Message *msg = Message::create_message(this, PBFT_COMMIT_MSG);
     PBFTCommitMessage *cmsg = (PBFTCommitMessage *)msg;
+
+    cout << "Sending commit messages:  " << cmsg->txn_id << "From: " << g_node_id << endl;
 
 #if LOCAL_FAULT == true || VIEW_CHANGES
     if (get_commit_rsp_cnt() > 0)

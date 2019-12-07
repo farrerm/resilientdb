@@ -60,7 +60,9 @@ RC WorkerThread::process_client_batch(Message *msg)
 
     // Initialize all transaction mangers and Send BatchRequests message.
     create_and_send_batchreq(clbtch, clbtch->txn_id);
-    cout << "Sending preprepare: " << msg->txn_id << endl;
+    //inside create_and_set_batchreq, txn_id is set to txn_id + g_node_id * get_batch_size()
+    //this is to guarantee a unique sequence number for different replicas
+   // cout << "Sending preprepare: " << (clbtch->txn_id + g_node_id * get_batch_size()) << endl;
    // bool ready = txn_man->unset_ready();
     //assert(ready);
 
@@ -82,7 +84,8 @@ RC WorkerThread::process_client_batch(Message *msg)
  */
 RC WorkerThread::process_batch(Message *msg)
 {
-    cout << "Process PrePrepare message: " << msg->txn_id << endl;
+    cout << "Receiving PrePrepare message: " << msg->txn_id << endl;
+    cout << "From: " << msg->return_node_id << endl;
 	//set_current_view(get_thd_id(), msg->return_node_id);
 
     uint64_t cntime = get_sys_clock();
@@ -224,7 +227,7 @@ RC WorkerThread::process_batch(Message *msg)
  */
 RC WorkerThread::process_pbft_prep_msg(Message *msg)
 {
-    cout << "PBFTPrepMessage: TID: " << msg->txn_id << " FROM: " << msg->return_node_id << endl;
+    cout << "Receiving Prepare: " << msg->txn_id << " FROM: " << msg->return_node_id << endl;
     //fflush(stdout);
 
     // Start the counter for prepare phase.
