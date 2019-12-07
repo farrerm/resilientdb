@@ -35,7 +35,7 @@ RC WorkerThread::process_client_batch(Message *msg)
 
     //printf("ClientQueryBatch: %ld, THD: %ld :: CL: %ld :: RQ: %ld\n",msg->txn_id, get_thd_id(), msg->return_node_id, clbtch->cqrySet[0]->requests[0]->key);
     //fflush(stdout);
-	cout << "Processing client batch: " << msg->txn_id << endl;
+	cout << "Processing client batch: " << endl;
 
 	cout << "My Node ID is: " << g_node_id << endl;
 
@@ -60,8 +60,8 @@ RC WorkerThread::process_client_batch(Message *msg)
 
     // Initialize all transaction mangers and Send BatchRequests message.
     create_and_send_batchreq(clbtch, clbtch->txn_id);
-
-    //bool ready = txn_man->unset_ready();
+    cout << "Sending preprepare: " << msg->txn_id << endl;
+   // bool ready = txn_man->unset_ready();
     //assert(ready);
 
     return RCOK;
@@ -116,7 +116,7 @@ RC WorkerThread::process_batch(Message *msg)
     //Send preperae message ELSE send nil
     //L23 on pseudo code
    // if (getLockedRound() == -1 || getLockedValue() == (int)msg->txn_id){
-     //   txn_man->send_pbft_prep_msgs();
+        txn_man->send_pbft_prep_msgs();
         //Start clock
    // }
 
@@ -224,7 +224,7 @@ RC WorkerThread::process_batch(Message *msg)
  */
 RC WorkerThread::process_pbft_prep_msg(Message *msg)
 {
-    //cout << "PBFTPrepMessage: TID: " << msg->txn_id << " FROM: " << msg->return_node_id << endl;
+    cout << "PBFTPrepMessage: TID: " << msg->txn_id << " FROM: " << msg->return_node_id << endl;
     //fflush(stdout);
 
     // Start the counter for prepare phase.
