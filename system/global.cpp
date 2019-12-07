@@ -275,7 +275,15 @@ uint commonVar = 0;
 uint64_t next_idx = 0;
 uint64_t get_and_inc_next_idx()
 {
+#if TENDERMINT
+    cout << "My node id: "  << g_node_id << endl;
+    cout << "Total nodes: " << g_node_cnt << endl;
+    uint64_t val = (next_idx * g_node_cnt) + g_node_id;
+	next_idx++;
+#else
 	uint64_t val = next_idx++;
+#endif
+    cout << "Sequence #: " << val << endl;
 	return val;
 }
 

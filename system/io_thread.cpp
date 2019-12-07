@@ -351,7 +351,8 @@ RC InputThread::server_recv_loop()
             if (msg->rtype == CL_BATCH)
             {
                 // Linearizing requests.
-                msg->txn_id = get_and_inc_next_idx() + 4;
+                msg->txn_id = get_and_inc_next_idx();// + 4;
+                //cout << "Sequence #: " << msg->txn_id << endl;
                 INC_STATS(_thd_id, msg_cl_in, 1);
             }
 
