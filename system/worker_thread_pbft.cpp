@@ -129,7 +129,7 @@ RC WorkerThread::process_batch(Message *msg)
         //Send preperae message
         //L29 on pseudocode
     //else if(getLockedRound() <= msg->lockedRound || getLockedValue() == msg->lockedValue){
-             txn_man->send_pbft_prep_msgs();
+             //txn_man->send_pbft_prep_msgs();
     //    }
 
     // End the counter for pre-prepare phase as prepare phase starts next.
@@ -271,7 +271,7 @@ RC WorkerThread::process_pbft_prep_msg(Message *msg)
  */
 bool WorkerThread::committed_local(PBFTCommitMessage *msg)
 {
-    //cout << "Check Commit: TID: " << txn_man->get_txn_id() << "\n";
+    cout << "Receiving commit msg:  " << msg->get_txn_id() << "from: " << msg->return_node_id <<  "\n";
     //fflush(stdout);
 
     // Once committed is set for this transaction, no further processing.
@@ -293,10 +293,13 @@ bool WorkerThread::committed_local(PBFTCommitMessage *msg)
         if (!checkMsg(msg))
         {
             // If message did not match.
-            //cout << txn_man->get_hash() << " :: " << msg->hash << "\n";
-            //cout << get_current_view(get_thd_id()) << " :: " << msg->view << "\n";
+            cout << txn_man->get_hash() << " :: " << msg->hash << "\n";
+            cout << get_current_view(get_thd_id()) << " :: " << msg->view << "\n";
             //fflush(stdout);
             return false;
+        }
+        else{
+            cout << "messages match" << endl;
         }
     }
 
@@ -304,6 +307,7 @@ bool WorkerThread::committed_local(PBFTCommitMessage *msg)
     if (comm_cnt == 0 && txn_man->is_prepared())
     {
         txn_man->set_committed();
+        cout << "committed local: " << msg->txn_id << endl;
         return true;
     }
 
@@ -322,7 +326,7 @@ bool WorkerThread::committed_local(PBFTCommitMessage *msg)
  */
 RC WorkerThread::process_pbft_commit_msg(Message *msg)
 {
-    //cout << "PBFTCommitMessage: TID " << msg->txn_id << " FROM: " << msg->return_node_id << "\n";
+    cout << "Receiving Commit Message: " << msg->txn_id << " FROM: " << msg->return_node_id << "\n";
     //fflush(stdout);
 
     if (txn_man->commit_rsp_cnt == 2 * g_min_invalid_nodes + 1)
@@ -344,6 +348,7 @@ RC WorkerThread::process_pbft_commit_msg(Message *msg)
 
         // Add this message to execute thread's queue.
         send_execute_msg();
+        cout << "sending execute message: " << msg->txn_id << endl;
 
         INC_STATS(get_thd_id(), time_commit, get_sys_clock() - txn_man->txn_stats.time_start_commit);
     }

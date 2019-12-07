@@ -1274,7 +1274,7 @@ void WorkerThread::create_and_send_batchreq(ClientQueryBatch *msg, uint64_t tid)
     // Send the BatchRequests message to all the other replicas.
     vector<uint64_t> dest = nodes_to_send(0, g_node_cnt);
     msg_queue.enqueue(get_thd_id(), breq, emptyvec, dest);
-    cout << "Sending preprepare:  " << breq->txn_id << "From: " << g_node_id << endl;
+    cout << "Sending preprepare:   " << breq->txn_id << "From: " << g_node_id << endl;
     emptyvec.clear();
 }
 
