@@ -31,7 +31,7 @@ RC WorkerThread::process_client_batch(Message *msg)
 
     //uint64_t nextView = (currView + 1) % g_node_cnt; 
 
-    set_current_view(get_thd_id(), g_node_id);
+    //set_current_view(get_thd_id(), g_node_id);
 
     //printf("ClientQueryBatch: %ld, THD: %ld :: CL: %ld :: RQ: %ld\n",msg->txn_id, get_thd_id(), msg->return_node_id, clbtch->cqrySet[0]->requests[0]->key);
     //fflush(stdout);
@@ -93,15 +93,15 @@ RC WorkerThread::process_batch(Message *msg)
     //fflush(stdout);
 
     // Assert that only a non-primary replica has received this message.
-    assert(g_node_id != get_current_view(get_thd_id()));
+   // assert(g_node_id != get_current_view(get_thd_id()));
 
     // Check if the message is valid.
     validate_msg(breq);
 
-#if VIEW_CHANGES
+//#if VIEW_CHANGES
     // Store the batch as it could be needed during view changes.
-    store_batch_msg(breq);
-#endif
+   // store_batch_msg(breq);
+//#endif
 
     // Allocate transaction managers for all the transactions in the batch.
     set_txn_man_fields(breq, 0);
@@ -115,19 +115,19 @@ RC WorkerThread::process_batch(Message *msg)
     //if lockedBatch has locked on this incoming message in last round
     //Send preperae message ELSE send nil
     //L23 on pseudo code
-    if (getLockedRound() == -1 || getLockedValue() == (int)msg->txn_id){
-        txn_man->send_pbft_prep_msgs();
+   // if (getLockedRound() == -1 || getLockedValue() == (int)msg->txn_id){
+     //   txn_man->send_pbft_prep_msgs();
         //Start clock
-    }
+   // }
 
     //check if:
         // - lockedvalue == v
         // - locked round <= vr
         //Send preperae message
         //L29 on pseudocode
-    else if(getLockedRound() <= msg->lockedRound || getLockedValue() == msg->lockedValue){
+    //else if(getLockedRound() <= msg->lockedRound || getLockedValue() == msg->lockedValue){
              txn_man->send_pbft_prep_msgs();
-        }
+    //    }
 
     // End the counter for pre-prepare phase as prepare phase starts next.
     double timepre = get_sys_clock() - cntime;

@@ -633,6 +633,9 @@ RC WorkerThread::process_new_view_msg(Message *msg)
 RC WorkerThread::run()
 {
     tsetup();
+    //set view to myself
+  //  set_current_view(get_thd_id(), g_node_id);
+    set_view(g_node_id);
     printf("Running WorkerThread %ld\n", _thd_id);
 
     uint64_t agCount = 0, ready_starttime, idle_starttime = 0;
@@ -823,11 +826,11 @@ RC WorkerThread::process_execute_msg(Message *msg)
     cout << "========================\n";
     setLockedValue(-1);
 
-    uint64_t currView = get_current_view(get_thd_id());
+    //uint64_t currView = get_current_view(get_thd_id());
 
-    uint64_t nextView = (currView + 1) % g_node_cnt; 
+   // uint64_t nextView = (currView + 1) % g_node_cnt; 
 
-    set_current_view(get_thd_id(), nextView);
+   // set_current_view(get_thd_id(), nextView);
 
         // Reset the views for different threads.
         //uint64_t total_thds = g_batch_threads + g_rem_thread_cnt + 2;

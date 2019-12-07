@@ -118,6 +118,7 @@ RC ClientThread::run()
 		progress_stats();
 		int32_t inf_cnt;
 		uint32_t next_node = get_view();
+		//
 		next_node_id = get_view();
 
 #if VIEW_CHANGES

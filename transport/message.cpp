@@ -1233,7 +1233,7 @@ uint64_t BatchRequests::get_size()
 void BatchRequests::init(uint64_t thd_id)
 {
 	// Only primary should create this message
-	assert(get_current_view(thd_id) == g_node_id);
+	//assert(get_current_view(thd_id) == g_node_id);
 	this->view = get_current_view(thd_id);
 
 	this->index.init(get_batch_size());
@@ -1416,11 +1416,11 @@ bool BatchRequests::validate(uint64_t thd_id)
 
 	//is the view the same as the view observed by this message
 #if !RBFT_ON
-	if (this->view != get_current_view(thd_id))
-	{
-		assert(0);
-		return false;
-	}
+	//if (this->view != get_current_view(thd_id))
+	//{
+//		assert(0);
+//		return false;
+//	}
 #endif
 
 	return true;
