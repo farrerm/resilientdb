@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
     fflush(stdout);
     printf("PASS! SimTime = %f\n", (float)(endtime - starttime) / BILLION);
     if (STATS_ENABLE)
-        stats.print(false);
+       // stats.print(false);
 
     printf("\n");
     fflush(stdout);

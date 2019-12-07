@@ -647,7 +647,7 @@ RC WorkerThread::run()
     {
         txn_man = NULL;
         heartbeat();
-        progress_stats();
+        //progress_stats();
 
 #if VIEW_CHANGES
         // Thread 0 continously monitors the timer for each batch.

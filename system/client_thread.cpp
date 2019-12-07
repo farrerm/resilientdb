@@ -112,6 +112,8 @@ RC ClientThread::run()
 	bmsg->init();
 #endif
 	uint32_t next_node_id = get_view();
+
+	uint32_t next_Pnode = get_view();
 	while (!simulation->is_done())
 	{
 		heartbeat();
@@ -171,8 +173,8 @@ RC ClientThread::run()
 		INC_STATS(get_thd_id(), txn_sent_cnt, 1);
 
 #else // If client batching enable
-
-		if ((inf_cnt = client_man.inc_inflight(next_node)) < 0)
+		//changed next_node to next_Pnode - MF
+		if ((inf_cnt = client_man.inc_inflight(next_Pnode)) < 0)
 		{
 			continue;
 		}
