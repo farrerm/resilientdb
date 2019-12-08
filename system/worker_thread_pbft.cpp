@@ -252,7 +252,7 @@ RC WorkerThread::process_pbft_prep_msg(Message *msg)
             cout << "Locking value: " << getLockedValue() << endl;
         #endif
         txn_man->send_pbft_commit_msgs();
-        txn_man->decr_commit_rsp_cnt();
+        //txn_man->decr_commit_rsp_cnt();
 
         // End the prepare counter.
         INC_STATS(get_thd_id(), time_prepare, get_sys_clock() - txn_man->txn_stats.time_start_prepare);
@@ -311,6 +311,9 @@ bool WorkerThread::committed_local(PBFTCommitMessage *msg)
         txn_man->set_committed();
         cout << "committed local: " << msg->txn_id << endl;
         return true;
+    } else {
+        cout << "Commit count: " << comm_cnt << " Is prepared? "
+             << txn_man->is_prepared() << endl;
     }
 
     return false;

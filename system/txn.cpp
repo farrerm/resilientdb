@@ -149,7 +149,7 @@ void TxnManager::init(uint64_t pool_id, Workload *h_wl)
     prepared = false;
     committed_local = false;
     prep_rsp_cnt = 2 * g_min_invalid_nodes;
-    commit_rsp_cnt = prep_rsp_cnt + 1;
+    commit_rsp_cnt = prep_rsp_cnt; // + 1;
     chkpt_cnt = 2 * g_min_invalid_nodes;
 
     txn_stats.init();
