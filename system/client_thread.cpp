@@ -113,7 +113,7 @@ RC ClientThread::run()
 #endif
 	uint32_t next_node_id = get_view();
 
-	uint32_t next_Pnode = get_view();
+	//uint32_t next_Pnode = get_view();
 	while (!simulation->is_done())
 	{
 		heartbeat();
@@ -174,7 +174,7 @@ RC ClientThread::run()
 
 #else // If client batching enable
 		//changed next_node to next_Pnode - MF
-		if ((inf_cnt = client_man.inc_inflight(next_Pnode)) < 0)
+		if ((inf_cnt = client_man.inc_inflight(next_node)) < 0)
 		{
 			continue;
 		}

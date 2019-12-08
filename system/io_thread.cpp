@@ -216,6 +216,9 @@ RC InputThread::client_recv_loop()
             // Check if the response is valid.
             if (clrsp->validate())
             {
+#if TENDERMINT
+                incrementHeight();
+#endif
 
 #if TIMER_ON
                 // End the timer.

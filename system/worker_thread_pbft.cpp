@@ -119,6 +119,7 @@ RC WorkerThread::process_batch(Message *msg)
     //Send preperae message ELSE send nil
     //L23 on pseudo code
    // if (getLockedRound() == -1 || getLockedValue() == (int)msg->txn_id){
+        txn_man->decr_prep_rsp_cnt();
         txn_man->send_pbft_prep_msgs();
         //Start clock
    // }
@@ -251,6 +252,7 @@ RC WorkerThread::process_pbft_prep_msg(Message *msg)
             cout << "Locking value: " << getLockedValue() << endl;
         #endif
         txn_man->send_pbft_commit_msgs();
+        txn_man->decr_commit_rsp_cnt();
 
         // End the prepare counter.
         INC_STATS(get_thd_id(), time_prepare, get_sys_clock() - txn_man->txn_stats.time_start_prepare);

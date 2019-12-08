@@ -664,10 +664,10 @@ RC WorkerThread::run()
 
         // Dequeue a message from its work_queue.
         Message *msg = work_queue.dequeue(get_thd_id());
-        if (msg) {
+        /*if (msg) {
           cout << "Received msg txn: " << msg->txn_id << endl;
           cout << "Message type: " << msg->rtype << endl;
-        }
+        }*/
         if (!msg)
         {
             if (idle_starttime == 0)
@@ -1193,7 +1193,7 @@ void WorkerThread::create_and_send_batchreq(ClientQueryBatch *msg, uint64_t tid)
     breq->init(get_thd_id());
 
     // Starting index for this batch of transactions.
-    next_set = tid + g_node_id;
+    next_set = tid; // + g_node_id;
 
 
     // String of transactions in a batch to generate hash.
@@ -1418,7 +1418,8 @@ bool WorkerThread::prepared(PBFTPrepMessage *msg)
     }
 
     uint64_t prep_cnt = txn_man->decr_prep_rsp_cnt();
-    //cout << ""
+    /*cout << "Prepare messages left to see: " << prep_cnt << " for txn: " 
+         << msg->txn_id << endl;*/
     if (prep_cnt == 0)
     {
         txn_man->set_prepared();
