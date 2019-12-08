@@ -635,7 +635,7 @@ RC WorkerThread::run()
     tsetup();
     //set view to myself
     set_current_view(get_thd_id(), g_node_id);
-    set_view(g_node_id);
+    //set_view(g_node_id);
     printf("Running WorkerThread %ld\n", _thd_id);
 
     uint64_t agCount = 0, ready_starttime, idle_starttime = 0;
@@ -656,18 +656,23 @@ RC WorkerThread::run()
             check_for_timeout();
         }
 
-        if (g_node_id != get_current_view(get_thd_id()))
-        {
-            check_switch_view();
-        }
+       // if (g_node_id != get_current_view(get_thd_id()))
+        //{
+          //  check_switch_view();
+        //}
 #endif
 
         // Dequeue a message from its work_queue.
+        
+
         Message *msg = work_queue.dequeue(get_thd_id());
-        /*if (msg) {
+        
+        if (msg) {
           cout << "Received msg txn: " << msg->txn_id << endl;
           cout << "Message type: " << msg->rtype << endl;
-        }*/
+        }
+
+
         if (!msg)
         {
             if (idle_starttime == 0)
@@ -1279,6 +1284,10 @@ void WorkerThread::create_and_send_batchreq(ClientQueryBatch *msg, uint64_t tid)
     vector<uint64_t> dest = nodes_to_send(0, g_node_cnt);
     msg_queue.enqueue(get_thd_id(), breq, emptyvec, dest);
     cout << "Sending preprepare:   " << breq->txn_id << "From: " << g_node_id << endl;
+    cout << "To: " << endl;
+    for (size_t i = 0; i < dest.size(); i++){
+        cout << dest.at(i) << endl;
+    }
     /*for(vector<uint64_t>::iterator it = dest.begin(); it != dest.end(); ++it) {
         cout << "Sending to: " << *it << " this: " << breq->txn_id << endl;
     }*/

@@ -1234,7 +1234,7 @@ void BatchRequests::init(uint64_t thd_id)
 {
 	// Only primary should create this message
 	//assert(get_current_view(thd_id) == g_node_id);
-	this->view = get_current_view(thd_id);
+	//this->view = get_current_view(thd_id);
 
 	this->index.init(get_batch_size());
 	this->requestMsg.resize(get_batch_size());

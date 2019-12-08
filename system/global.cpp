@@ -276,8 +276,8 @@ uint64_t next_idx = 0;
 uint64_t get_and_inc_next_idx()
 {
 #if TENDERMINT
-    cout << "My node id: "  << g_node_id << endl;
-    cout << "Total nodes: " << g_node_cnt << endl;
+  //  cout << "My node id: "  << g_node_id << endl;
+    //cout << "Total nodes: " << g_node_cnt << endl;
     uint64_t val = (next_idx * g_node_cnt) + g_node_id;
 	next_idx++;
 #else
@@ -310,7 +310,7 @@ vector<uint64_t> nodes_to_send(uint64_t beg, uint64_t end)
 	vector<uint64_t> dest;
 	for (uint64_t i = beg; i < end; i++)
 	{
-		if (i == g_node_id)
+		if (i == (uint64_t)g_node_id)
 		{
 			continue;
 		}

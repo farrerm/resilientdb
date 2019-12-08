@@ -37,9 +37,9 @@ RC WorkerThread::process_client_batch(Message *msg)
     //fflush(stdout);
 	cout << "Processing client batch: " << endl;
 
-	cout << "My Node ID is: " << g_node_id << endl;
+//	cout << "My Node ID is: " << g_node_id << endl;
 
-	cout << "I process it because I am the primary." << endl;
+//	cout << "I process it because I am the primary." << endl;
 
     ClientQueryBatch *clbtch = (ClientQueryBatch *)msg;
 
@@ -86,11 +86,14 @@ RC WorkerThread::process_batch(Message *msg)
 {
     cout << "Receiving PrePrepare message: " << msg->txn_id << endl;
     cout << "From: " << msg->return_node_id << endl;
+    
 	//set_current_view(get_thd_id(), msg->return_node_id);
 
     uint64_t cntime = get_sys_clock();
 
     BatchRequests *breq = (BatchRequests *)msg;
+
+    //cout << "message view: " << breq->view << endl; 
 
     //printf("BatchRequests: TID:%ld : VIEW: %ld : THD: %ld\n",breq->txn_id, breq->view, get_thd_id());
     //fflush(stdout);
@@ -273,7 +276,7 @@ RC WorkerThread::process_pbft_prep_msg(Message *msg)
  */
 bool WorkerThread::committed_local(PBFTCommitMessage *msg)
 {
-    cout << "Receiving commit msg:  " << msg->get_txn_id() << "from: " << msg->return_node_id <<  "\n";
+   // cout << "Receiving commit msg:  " << msg->get_txn_id() << "from: " << msg->return_node_id <<  "\n";
     //fflush(stdout);
 
     // Once committed is set for this transaction, no further processing.

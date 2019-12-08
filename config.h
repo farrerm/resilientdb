@@ -30,7 +30,7 @@
 #define TIME_PROF_ENABLE false 
 #define FIN_BY_TIME true 
 // Number of transactions each client should send without waiting. 
-#define MAX_TXN_IN_FLIGHT 10
+#define MAX_TXN_IN_FLIGHT 100
 #define SERVER_GENERATE_QUERIES false  
 #define MEM_ALLIGN 8 
 #define THREAD_ALLOC false 
@@ -62,7 +62,7 @@
 #define BTREE_ORDER 16 
 #define TS_TWR false 
 #define TS_ALLOC TS_CLOCK 
-#define TS_BATCH_ALLOC false 
+#define TS_BATCH_ALLOC true
 #define TS_BATCH_NUM 1 
 #define HIS_RECYCLE_LEN 10 
 #define MAX_PRE_REQ         MAX_TXN_IN_FLIGHT * NODE_CNT 
@@ -163,11 +163,11 @@
 #define RPBFT 1 
 #define RDBFT 2 
 // Enable or Disable pipeline at primary replica. 
-#define ENABLE_PIPELINE true 
+#define ENABLE_PIPELINE false
 // Number of threads to create batches at primary replica.  
-#define BATCH_THREADS 2 
+#define BATCH_THREADS 3
 // Size of each batch. 
-#define BATCH_SIZE 10
+#define BATCH_SIZE 100
 #define BATCH_ENABLE BSET 
 #define BSET 1 
 #define BUNSET 0 
