@@ -14,6 +14,8 @@
 #include "message.h"
 #include "timer.h"
 
+vector<ClientQueryBatch *> WorkerThread::client_query_batch;
+
 void WorkerThread::send_key()
 {
     // Send everyone the public key.
@@ -824,6 +826,19 @@ RC WorkerThread::process_execute_msg(Message *msg)
     #if TENDERMINT
     incrementHeight();
     cout << "Height: " << getHeight() << endl;
+    for(unsigned int i =0; i< client_query_batch.size(); i++){
+            cout << " Inside client Query batch vector (worker_thread)" << client_query_batch[i]->txn_id << endl;
+    }
+    cout << "Vector size --------------------------> " << client_query_batch.size() << endl;
+    if(!client_query_batch.empty()){
+        cout << "frst request in vector: " << client_query_batch.front()->txn_id << " height" << height << endl;
+        if(client_query_batch.front()->txn_id == height){
+            cout << "I am inside this if statment; ************** " << endl;
+         create_and_send_batchreq(client_query_batch.front(), client_query_batch.front()->txn_id);
+         client_query_batch.erase(client_query_batch.begin());
+        }
+    }
+
 
 
     resettRound();

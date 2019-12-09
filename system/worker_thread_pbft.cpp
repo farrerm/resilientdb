@@ -14,6 +14,7 @@
 #include "message.h"
 #include "timer.h"
 
+
 /**
  * Processes an incoming client batch and sends a Pre-prepare message to al replicas.
  *
@@ -59,7 +60,19 @@ RC WorkerThread::process_client_batch(Message *msg)
 #endif
 
     // Initialize all transaction mangers and Send BatchRequests message.
-    create_and_send_batchreq(clbtch, clbtch->txn_id);
+    cout << " Txn Id is------" << clbtch->txn_id << " height------ " << height << endl;
+     if(clbtch->txn_id == height){
+         create_and_send_batchreq(clbtch, clbtch->txn_id);
+    }
+    else{
+        client_query_batch.push_back(clbtch);
+          cout << "Vector size (IN PBFTTTT)--------------------------> " << client_query_batch.size() << endl;
+        for(unsigned int i =0; i< client_query_batch.size(); i++){
+            cout << " Inside client Query batch vector " << client_query_batch[i]->txn_id << endl;
+        }
+    }
+
+
     //inside create_and_set_batchreq, txn_id is set to txn_id + g_node_id * get_batch_size()
     //this is to guarantee a unique sequence number for different replicas
    // cout << "Sending preprepare: " << (clbtch->txn_id + g_node_id * get_batch_size()) << endl;

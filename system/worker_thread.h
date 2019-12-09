@@ -5,6 +5,7 @@
 #include "message.h"
 #include "crypto.h"
 
+
 class Workload;
 class Message;
 
@@ -15,6 +16,11 @@ public:
     void setup();
     void send_key();
     RC process_key_exchange(Message *msg);
+
+    #if TENDERMINT
+    static vector<ClientQueryBatch *> client_query_batch;
+    //std::mutex bstoreMTX;
+    #endif
 
     void process(Message *msg);
     TxnManager *get_transaction_manager(uint64_t txn_id, uint64_t batch_id);
