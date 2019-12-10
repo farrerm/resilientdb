@@ -997,7 +997,7 @@ RC WorkerThread::process_execute_msg(Message *msg)
     // End the execute counter.
     INC_STATS(get_thd_id(), time_execute, get_sys_clock() - ctime);
 
-    if(!prepMessages.empty()){
+   /* if(!prepMessages.empty()){
 
         for(size_t i = 0; i < prepMessages.size(); i++){
 
@@ -1006,10 +1006,10 @@ RC WorkerThread::process_execute_msg(Message *msg)
                 i--;
             }
 
-        }
+        }*/
 
 
-        for(size_t i = 0; i < prepMessages.size(); i++){
+      /*  for(size_t i = 0; i < prepMessages.size(); i++){
 
             if((int)(prepMessages.at(i)->txn_id) < (int)((height + 1)* get_batch_size())  ){
 
@@ -1044,10 +1044,10 @@ RC WorkerThread::process_execute_msg(Message *msg)
 
             }
 
-        }
+        }*/
 
 
-    }
+   // }
 
     return RCOK;
 }
