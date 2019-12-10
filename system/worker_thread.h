@@ -18,7 +18,7 @@ public:
     RC process_key_exchange(Message *msg);
 
     #if TENDERMINT
-    static vector<ClientQueryBatch *> client_query_batch;
+    static queue<ClientQueryBatch*> client_query_batch;
     //std::mutex bstoreMTX;
     #endif
 

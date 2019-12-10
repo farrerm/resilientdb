@@ -1,4 +1,3 @@
-#include "global.h"
 #include "message.h"
 #include "thread.h"
 #include "worker_thread.h"
@@ -14,7 +13,7 @@
 #include "message.h"
 #include "timer.h"
 
-vector<ClientQueryBatch *> WorkerThread::client_query_batch;
+queue<ClientQueryBatch*> WorkerThread::client_query_batch;
 
 void WorkerThread::send_key()
 {
@@ -782,6 +781,10 @@ bool WorkerThread::is_cc_new_timestamp()
 */
 void WorkerThread::init_txn_man(YCSBClientQueryMessage *clqry)
 {
+    
+    if (clqry == nullptr){
+        cout << "NULL" << endl;
+    }
     txn_man->client_id = clqry->return_node;
     txn_man->client_startts = clqry->client_startts;
 
@@ -826,29 +829,40 @@ RC WorkerThread::process_execute_msg(Message *msg)
     #if TENDERMINT
     incrementHeight();
     cout << "Height: " << getHeight() << endl;
-    for(unsigned int i =0; i< client_query_batch.size(); i++){
-            cout << " Inside client Query batch vector (worker_thread)" << client_query_batch[i]->txn_id << endl;
-    }
+    //for(unsigned int i =0; i< client_query_batch.size(); i++){
+   //         cout << " Inside client Query batch vector (worker_thread)" << client_query_batch.front()->txn_id << endl;
+   // }
     cout << "Vector size --------------------------> " << client_query_batch.size() << endl;
     if(!client_query_batch.empty()){
         cout << "frst request in vector: " << client_query_batch.front()->txn_id << " height" << height << endl;
         if(client_query_batch.front()->txn_id == height){
             cout << "I am inside this if statment; ************** " << endl;
+         
+         //ClientQueryBatch * nextBatch = new ClientQueryBatch();
+         //cout << "first" << endl;
+         //nextBatch = client_query_batch.front();
+         
+         cout << "second" << endl;
+         
+         cout << "third" << endl;
          create_and_send_batchreq(client_query_batch.front(), client_query_batch.front()->txn_id);
-         client_query_batch.erase(client_query_batch.begin());
+         client_query_batch.pop();
+         cout << "made it this far" << endl;
+         //client_query_batch.pop_front();
+        // cout << "made it past erase." << endl;
         }
     }
 
 
 
-    resettRound();
-    cout << "Resetting round: " << getTround() << endl;
+    //resettRound();
+   // cout << "Resetting round: " << getTround() << endl;
 
-    cout << "Releasing locked round: " << getLockedRound() << endl;
-    setLockedRound(-1);
-    cout << "Releasing locked value: " << getLockedValue() << endl;
-    cout << "========================\n";
-    setLockedValue(-1);
+    //cout << "Releasing locked round: " << getLockedRound() << endl;
+    //setLockedRound(-1);
+    //cout << "Releasing locked value: " << getLockedValue() << endl;
+    //cout << "========================\n";
+    //setLockedValue(-1);
 
     //uint64_t currView = get_current_view(get_thd_id());
 
@@ -1208,23 +1222,30 @@ void WorkerThread::set_txn_man_fields(BatchRequests *breq, uint64_t bid)
 void WorkerThread::create_and_send_batchreq(ClientQueryBatch *msg, uint64_t tid)
 {
     // Creating a new BatchRequests Message.
+    cout << "fourth" << endl;
     Message *bmsg = Message::create_message(BATCH_REQ);
+    cout << "fifth" << endl;
     BatchRequests *breq = (BatchRequests *)bmsg;
+    cout << "sixth" << endl;
     breq->init(get_thd_id());
+    cout << "seventh" << endl;
 
     // Starting index for this batch of transactions.
     next_set = tid; // + g_node_id;
 
-
+    cout << "eighth" << endl;
     // String of transactions in a batch to generate hash.
     string batchStr;
 
     // Allocate transaction manager for all the requests in batch.
     for (uint64_t i = 0; i < get_batch_size(); i++)
     {
+        cout << i << endl;
+
         uint64_t txn_id = get_next_txn_id() + i;
 
-        //cout << "Txn: " << txn_id << " :: Thd: " << get_thd_id() << "\n";
+
+        cout << "Txn: " << txn_id << " :: Thd: " << get_thd_id() << "\n";
         //fflush(stdout);
         txn_man = get_transaction_manager(txn_id, 0);
 
@@ -1241,26 +1262,34 @@ void WorkerThread::create_and_send_batchreq(ClientQueryBatch *msg, uint64_t tid)
                 break;
             }
         }
+        cout << "while " << endl;
 
         txn_man->register_thread(this);
+        cout << "register" << endl;
         txn_man->return_id = msg->return_node;
-
+        cout << "return id " << endl;
         // Fields that need to updated according to the specific algorithm.
         algorithm_specific_update(msg, i);
+        cout << "update" << endl;
 
         init_txn_man(msg->cqrySet[i]);
 
+        cout << "txn_man " << endl;
         // Append string representation of this txn.
         batchStr += msg->cqrySet[i]->getString();
+        cout << "append something" << endl;
 
         // Setting up data for BatchRequests Message.
         breq->copy_from_txn(txn_man, msg->cqrySet[i]);
-
+        cout << "copy from txn" << endl;
         // Reset this txn manager.
         bool ready = txn_man->set_ready();
-        assert(ready);
-    }
+        cout << "reset" << endl;
 
+        assert(ready);
+        cout << "ready" << endl;
+    }
+    cout << "for loop to allocate txn managers" << endl;
     // Now we need to unset the txn_man again for the last txn of batch.
     while (true)
     {
@@ -1274,16 +1303,19 @@ void WorkerThread::create_and_send_batchreq(ClientQueryBatch *msg, uint64_t tid)
             break;
         }
     }
-
+    cout << "unset txn man" << endl;
     // Generating the hash representing the whole batch in last txn man.
     txn_man->set_hash(calculateHash(batchStr));
-    txn_man->hashSize = txn_man->hash.length();
+    cout << "set hash" << endl;
 
+    txn_man->hashSize = txn_man->hash.length();
+    cout << "hash size" << endl;
     breq->copy_from_txn(txn_man);
 
     // Storing all the signatures.
     vector<string> emptyvec;
     TxnManager *tman = get_transaction_manager(txn_man->get_txn_id() - 2, 0);
+    cout << "get signatures" << endl;
     for (uint64_t i = 0; i < g_node_cnt; i++)
     {
         if (i == g_node_id)

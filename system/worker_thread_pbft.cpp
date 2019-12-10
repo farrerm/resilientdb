@@ -65,11 +65,14 @@ RC WorkerThread::process_client_batch(Message *msg)
          create_and_send_batchreq(clbtch, clbtch->txn_id);
     }
     else{
-        client_query_batch.push_back(clbtch);
+    	ClientQueryBatch *myBatch = new ClientQueryBatch(*clbtch);
+    	//*myBatch = *clbtch;
+        //clbtch->clientNum = clbtch->txn_id;
+        client_query_batch.push(myBatch);
           cout << "Vector size (IN PBFTTTT)--------------------------> " << client_query_batch.size() << endl;
-        for(unsigned int i =0; i< client_query_batch.size(); i++){
-            cout << " Inside client Query batch vector " << client_query_batch[i]->txn_id << endl;
-        }
+        //for(unsigned int i =0; i< client_query_batch.size(); i++){
+        //    cout << " Inside client Query batch vector " << client_query_batch[i]->txn_id << endl;
+       // }
     }
 
 
@@ -262,10 +265,10 @@ RC WorkerThread::process_pbft_prep_msg(Message *msg)
     {
         // Send Commit messages.
         #if TENDERMINT
-            setLockedRound((int)tRound);
-            setLockedValue((int)msg->txn_id);
-            cout << "Locking round: " << getLockedRound() << endl;
-            cout << "Locking value: " << getLockedValue() << endl;
+           // setLockedRound((int)tRound);
+          //  setLockedValue((int)msg->txn_id);
+           // cout << "Locking round: " << getLockedRound() << endl;
+           // cout << "Locking value: " << getLockedValue() << endl;
         #endif
         txn_man->send_pbft_commit_msgs();
         //txn_man->decr_commit_rsp_cnt();

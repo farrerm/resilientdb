@@ -232,6 +232,7 @@ public:
     uint64_t return_node;
     uint64_t batch_size;
     Array<YCSBClientQueryMessage *> cqrySet;
+    uint64_t clientNum;
 };
 #endif
 
