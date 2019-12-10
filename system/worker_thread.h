@@ -16,6 +16,8 @@ public:
     void send_key();
     RC process_key_exchange(Message *msg);
 
+    static std::vector<PBFTPrepMessage *> prepMessages;
+
     void process(Message *msg);
     TxnManager *get_transaction_manager(uint64_t txn_id, uint64_t batch_id);
     RC init_phase();
