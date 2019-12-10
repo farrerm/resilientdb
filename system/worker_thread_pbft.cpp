@@ -106,7 +106,7 @@ RC WorkerThread::process_batch(Message *msg)
 
 //#if VIEW_CHANGES
     // Store the batch as it could be needed during view changes.
-    store_batch_msg(breq);
+    
 //#endif
 
     // Allocate transaction managers for all the transactions in the batch.
@@ -121,11 +121,23 @@ RC WorkerThread::process_batch(Message *msg)
     //if lockedBatch has locked on this incoming message in last round
     //Send preperae message ELSE send nil
     //L23 on pseudo code
-   // if (getLockedRound() == -1 || getLockedValue() == (int)msg->txn_id){
+
+
+    //if (getLockedRound() == -1 || getLockedValue() == (int)msg->txn_id){
+    std::cout << "Txn ID IS~~~~~~~~~~" << (int)breq->txn_id  << "Comparing With " << (int)(height+1)*get_batch_size() << endl; 
+    
+
+    if ((size_t)breq->txn_id < (height+1)*get_batch_size()){
         txn_man->decr_prep_rsp_cnt();
         txn_man->send_pbft_prep_msgs();
         //Start clock
-   // }
+
+        cout << "I am processing********************************: " << (int)breq->txn_id << endl;
+    } 
+    else{
+        store_batch_msg(breq);
+        cout << "I decided to store this transcation&*******************************" << endl;
+    }
 
     //check if:
         // - lockedvalue == v

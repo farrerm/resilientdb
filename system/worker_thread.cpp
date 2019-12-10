@@ -844,6 +844,21 @@ RC WorkerThread::process_execute_msg(Message *msg)
     cout << "========================\n";
     setLockedValue(-1);
 
+   
+    if(!breqStore.empty()){
+        for(vector<BatchRequests *>::iterator i = breqStore.begin(); i != breqStore.end(); i++){
+            if((int)(*i)->txn_id < (int)((height + 1)*get_batch_size())){
+                 set_txn_man_fields(*i, 0);
+                 txn_man->decr_prep_rsp_cnt();
+                 txn_man->send_pbft_prep_msgs();
+                 bool ready = txn_man->set_ready();
+                 assert(ready);
+                 breqStore.erase(i); 
+            }
+
+        }
+    }
+
     //uint64_t currView = get_current_view(get_thd_id());
 
    // uint64_t nextView = (currView + 1) % g_node_cnt; 
@@ -1136,9 +1151,9 @@ RC WorkerThread::process_pbft_chkpt_msg(Message *msg)
         inc_last_deleted_txn();
     }
 
-#if VIEW_CHANGES
-    removeBatch(del_range);
-#endif
+//#if VIEW_CHANGES
+    //removeBatch(del_range);
+//#endif
 
     return RCOK;
 }
