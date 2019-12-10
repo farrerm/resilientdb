@@ -14,6 +14,8 @@
 #include "message.h"
 #include "timer.h"
 
+std::vector<PBFTPrepMessage *> WorkerThread::prepMessages;
+
 void WorkerThread::send_key()
 {
     // Send everyone the public key.
@@ -746,7 +748,7 @@ RC WorkerThread::run()
             {
                 cout << "FAIL: " << txn_man->get_txn_id() << " :: RT: " << msg->rtype << "\n";
                 fflush(stdout);
-                assert(ready);
+             //   assert(ready);
             }
         }
 
@@ -824,7 +826,6 @@ RC WorkerThread::process_execute_msg(Message *msg)
     #if TENDERMINT
     incrementHeight();
     cout << "Height: " << getHeight() << endl;
-
 
     resettRound();
     cout << "Resetting round: " << getTround() << endl;
@@ -987,6 +988,59 @@ RC WorkerThread::process_execute_msg(Message *msg)
 
     // End the execute counter.
     INC_STATS(get_thd_id(), time_execute, get_sys_clock() - ctime);
+
+    if(!prepMessages.empty()){
+
+        for(size_t i = 0; i < prepMessages.size(); i++){
+
+            if((int)(prepMessages.at(i)->txn_id) < (int)((height)* get_batch_size())  ){
+                prepMessages.erase(prepMessages.begin() + i);
+                i--;
+            }
+
+        }
+
+
+        for(size_t i = 0; i < prepMessages.size(); i++){
+
+            if((int)(prepMessages.at(i)->txn_id) < (int)((height + 1)* get_batch_size())  ){
+
+                txn_man->set_ready();
+                txn_man = get_transaction_manager(prepMessages.at(i)->txn_id, 0);
+
+                //ready_starttime = get_sys_clock();
+                bool ready = txn_man->unset_ready();
+                if (!ready)
+                {
+                //cout << "Placing: Txn: " << msg->txn_id << " Type: " << msg->rtype << "\n";
+                //fflush(stdout);
+                // Return to work queue, end processing
+                    work_queue.enqueue(get_thd_id(), msg, true);
+                    continue;
+                }
+                txn_man->register_thread(this);
+
+
+
+                txn_man->send_pbft_commit_msgs();
+
+                prepMessages.erase(prepMessages.begin() + i);
+                for (size_t j = i; j < prepMessages.size(); j++){
+
+                    if ((int)(prepMessages.at(j)->txn_id) < (int)((height + 1)* get_batch_size())){
+                        prepMessages.erase(prepMessages.begin() + j);
+                    }
+                    j--;
+                }
+
+
+            }
+
+        }
+
+
+    }
+
     return RCOK;
 }
 
