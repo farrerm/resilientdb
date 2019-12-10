@@ -59,6 +59,7 @@ public:
     void reset();
     void fail_primary(Message *msg, uint64_t batch_to_fail);
 #endif
+    void store_batch_msg(BatchRequests *breq);
 
 #if LOCAL_FAULT
     void fail_nonprimary();

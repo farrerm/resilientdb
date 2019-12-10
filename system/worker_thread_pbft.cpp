@@ -106,7 +106,7 @@ RC WorkerThread::process_batch(Message *msg)
 
 //#if VIEW_CHANGES
     // Store the batch as it could be needed during view changes.
-   // store_batch_msg(breq);
+    store_batch_msg(breq);
 //#endif
 
     // Allocate transaction managers for all the transactions in the batch.

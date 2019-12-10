@@ -266,6 +266,14 @@ void WorkerThread::add_timer(Message *msg, string qryhash)
 }
 #endif
 
+
+void WorkerThread::store_batch_msg(BatchRequests *breq)
+{
+    char *bbuf = create_msg_buffer(breq);
+    Message *deepCMsg = deep_copy_msg(bbuf, breq);
+    storeBatch((BatchRequests *)deepCMsg);
+    delete_msg_buffer(bbuf);
+}
 #if VIEW_CHANGES
 /*
 Each non-primary replica continuously checks the timer for each batch. 
