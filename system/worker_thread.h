@@ -80,6 +80,7 @@ public:
 #endif
 
 #if TENDERMINT
+    static queue<Message *> batch_messages;
     void new_height();
 #endif
 

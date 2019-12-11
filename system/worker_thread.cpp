@@ -14,6 +14,8 @@
 #include "message.h"
 #include "timer.h"
 
+queue<Message *> WorkerThread::batch_messages;
+
 void WorkerThread::send_key()
 {
     // Send everyone the public key.
@@ -834,6 +836,13 @@ RC WorkerThread::process_execute_msg(Message *msg)
     cout << "Releasing locked value: " << getLockedValue() << endl;
     cout << "========================\n";
     setLockedValue(-1);
+
+    if(!batch_messages.empty()) {
+        if(batch_messages.front()->txn_id == height) {
+          work_queue.enqueue(get_thd_id(), batch_messages.front(), false);
+          batch_messages.pop();
+        }
+    }
 
     //uint64_t currView = get_current_view(get_thd_id());
 

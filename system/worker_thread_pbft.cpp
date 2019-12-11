@@ -58,8 +58,17 @@ RC WorkerThread::process_client_batch(Message *msg)
     fail_primary(msg, 9);
 #endif
 
+    if (clbtch->txn_id == height) {
+        create_and_send_batchreq(clbtch, clbtch->txn_id);
+    } else {
+        cout << "The height: " << height << " The txn_id: " << msg->txn_id << endl;
+        char *tbuf = create_msg_buffer(msg);
+        Message *deepMsg = deep_copy_msg(tbuf, msg);
+        batch_messages.push(deepMsg);
+        delete_msg_buffer(tbuf);
+        //work_queue.enqueue(get_thd_id(), msg, true);
+    }
     // Initialize all transaction mangers and Send BatchRequests message.
-    create_and_send_batchreq(clbtch, clbtch->txn_id);
     //inside create_and_set_batchreq, txn_id is set to txn_id + g_node_id * get_batch_size()
     //this is to guarantee a unique sequence number for different replicas
    // cout << "Sending preprepare: " << (clbtch->txn_id + g_node_id * get_batch_size()) << endl;
