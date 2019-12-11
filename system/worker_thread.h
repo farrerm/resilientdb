@@ -16,6 +16,8 @@ public:
     void send_key();
     RC process_key_exchange(Message *msg);
 
+    //static std::vector<BatchRequests *> batchMessages;
+
     void process(Message *msg);
     TxnManager *get_transaction_manager(uint64_t txn_id, uint64_t batch_id);
     RC init_phase();
@@ -46,6 +48,8 @@ public:
 #if TIMER_ON
     void add_timer(Message *msg, string qryhash);
 #endif
+
+void store_batch_msg(BatchRequests *breq);
 
 #if VIEW_CHANGES
     void client_query_check(ClientQueryBatch *clbtch);

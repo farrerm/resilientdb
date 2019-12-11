@@ -122,9 +122,18 @@ RC WorkerThread::process_batch(Message *msg)
     //Send preperae message ELSE send nil
     //L23 on pseudo code
    // if (getLockedRound() == -1 || getLockedValue() == (int)msg->txn_id){
+      
+    if ((int)breq->txn_id < (int)((height + 1) * get_batch_size())){
         txn_man->decr_prep_rsp_cnt();
         txn_man->send_pbft_prep_msgs();
-        //Start clock
+    
+    } else {
+
+       
+        store_batch_msg(breq);
+
+
+    }
    // }
 
     //check if:

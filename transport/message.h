@@ -392,6 +392,11 @@ public:
 /*	VIEW CHANGE SPECIFIC		*/
 /****************************************/
 
+extern vector<BatchRequests *> breqStore;
+extern std::mutex bstoreMTX;
+void storeBatch(BatchRequests *breq);
+void removeBatch(uint64_t range);
+
 #if VIEW_CHANGES
 
 class ViewChangeMsg : public Message

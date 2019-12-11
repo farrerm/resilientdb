@@ -14,6 +14,8 @@
 #include "message.h"
 #include "timer.h"
 
+//std::vector<BatchRequests *> WorkerThread::batchMessages;
+
 void WorkerThread::send_key()
 {
     // Send everyone the public key.
@@ -263,6 +265,14 @@ void WorkerThread::add_timer(Message *msg, string qryhash)
     delete_msg_buffer(tbuf);
 }
 #endif
+
+void WorkerThread::store_batch_msg(BatchRequests *breq)
+{
+    char *bbuf = create_msg_buffer(breq);
+    Message *deepCMsg = deep_copy_msg(bbuf, breq);
+    storeBatch((BatchRequests *)deepCMsg);
+    delete_msg_buffer(bbuf);
+}
 
 #if VIEW_CHANGES
 /*

@@ -1904,6 +1904,40 @@ bool PBFTCommitMessage::validate()
 /*	VIEW CHANGE SPECIFIC		*/
 /****************************************/
 
+vector<BatchRequests *> breqStore;
+std::mutex bstoreMTX;
+
+// Stores a BatchRequests message.
+void storeBatch(BatchRequests *breq)
+{
+	bstoreMTX.lock();
+	breqStore.push_back(breq);
+	bstoreMTX.unlock();
+}
+
+// Removes all the BatchRequests message till the specified range.
+void removeBatch(uint64_t range)
+{
+	uint64_t i = 0;
+	BatchRequests *bmsg;
+	bstoreMTX.lock();
+	for (; i < breqStore.size();)
+	{
+		bmsg = breqStore[i];
+		if (bmsg->index[get_batch_size() - 1] < range)
+		{
+			breqStore.erase(breqStore.begin() + i);
+			Message::release_message(bmsg);
+		}
+		else
+		{
+			// The first message with greater index, break!
+			break;
+		}
+	}
+	bstoreMTX.unlock();
+}
+
 #if VIEW_CHANGES
 
 uint64_t ViewChangeMsg::get_size()
