@@ -248,7 +248,6 @@ void Message::mcopy_to_buf(char *buf)
 	COPY_BUF(buf, lat_cc_time, ptr);
 	COPY_BUF(buf, lat_process_time, ptr);
 	lat_network_time = get_sys_clock();
-	
 	//printf("mtobuf %ld: %f, %f\n",txn_id,lat_network_time,lat_other_time);
 	COPY_BUF(buf, lat_network_time, ptr);
 	COPY_BUF(buf, lat_other_time, ptr);

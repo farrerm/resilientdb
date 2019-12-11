@@ -41,7 +41,7 @@ void MessageQueue::enqueue(uint64_t thd_id, Message *msg, const vector<string> &
         return;
     }
 
-    /* 
+    /*
         We sign the messages here before sending it to some replica.
         This idea works till every replica needs to generate a different signature
         for every other replica.

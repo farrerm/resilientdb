@@ -154,7 +154,12 @@
 #define PBFT 2
 #define ZYZZYVA 3
 #define HOTSTUFF 4
-#define TENDERMINT true
+#define TENDERMINT false
+#define TENDERMINT_TEST false
+#define T_PROPOSE false
+#define PASS_ON false
+#define PASS_ON_B false
+#define SKIP_VALIDATE false
 // Switching on RBFT consensus.
 // Status: Partial implementation, only for PBFT.
 #define RBFT_ON false

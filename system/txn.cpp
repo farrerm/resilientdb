@@ -148,8 +148,8 @@ void TxnManager::init(uint64_t pool_id, Workload *h_wl)
 
     prepared = false;
     committed_local = false;
-    prep_rsp_cnt = 2 * g_min_invalid_nodes;
-    commit_rsp_cnt = prep_rsp_cnt + 1;
+    prep_rsp_cnt = 2 * g_min_invalid_nodes; // each replica needs 2 messages to become prepared.
+    commit_rsp_cnt = prep_rsp_cnt + 1; // each replica needs 3 messages to become commited.
     chkpt_cnt = 2 * g_min_invalid_nodes;
 
     txn_stats.init();
@@ -428,59 +428,15 @@ void TxnManager::send_pbft_prep_msgs()
 
         #if TENDERMINT
           if(i == (g_node_id + 1) % g_node_cnt || i == (g_node_id - 1) % g_node_cnt){
-          //if(i == (g_node_id + 1) % g_node_cnt){
-             cout << "sending the prepare message " << pmsg->txn_id << " to " << i << endl;
-             dest.push_back(i);
+              dest.push_back(i);
           }
         #else
           dest.push_back(i);
         #endif
     }
-    #if TENDERMINT
-    cout << "Sent_prep: ";
-    for(uint64_t i=0; i < sent_prep.size(); i++){
-      cout <<  sent_prep.at(i) << " ";
-    }
-    cout << endl;
-    #endif
     msg_queue.enqueue(get_thd_id(), pmsg, emptyvec, dest);
     dest.clear();
 }
-
-#if TENDERMINT
-void TxnManager::pass_pbft_prep_msgs(PBFTPrepMessage* pmsg){
-  vector<string> emptyvec;
-  vector<uint64_t> dest;
-  for (uint64_t i = 0; i < g_node_cnt; i++)
-  {
-      if (i == g_node_id)
-      {
-          continue;
-      }
-
-      #if TENDERMINT
-        if(i == (g_node_id + 1) % g_node_cnt || i == (g_node_id - 1) % g_node_cnt){
-        //if(i == (g_node_id + 1) % g_node_cnt){
-          if (!count(sent_prep.begin(), sent_prep.end(), pmsg->return_node)){
-            cout << "passing the prepare message " << pmsg->txn_id << " sent by " << pmsg->return_node << " to " << i << endl;
-            dest.push_back(i);
-          }
-        }
-      #else
-        dest.push_back(i);
-      #endif
-  }
-  #if TENDERMINT
-  cout << "Sent_prep: ";
-  for(uint64_t i=0; i < sent_prep.size(); i++){
-    cout <<  sent_prep.at(i) << " ";
-  }
-  cout << endl;
-  #endif
-  msg_queue.enqueue(get_thd_id(), pmsg, emptyvec, dest);
-  dest.clear();
-}
-#endif
 
 
 //broadcasts commit message to all nodes
@@ -537,7 +493,6 @@ void TxnManager::release_all_messages(uint64_t txn_id)
     else if ((txn_id + 1) % get_batch_size() == 0)
     {
         info_prepare.clear();
-        sent_prep.clear();
         info_commit.clear();
     }
 }

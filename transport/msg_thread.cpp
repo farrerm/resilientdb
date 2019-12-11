@@ -28,6 +28,7 @@ void MessageThread::check_and_send_batches()
 {
     for (uint64_t dest_node_id = 0; dest_node_id < buffer_cnt; dest_node_id++)
     {
+        //NOTE: always true in current setting.
         if (buffer[dest_node_id]->ready())
         {
             send_batch(dest_node_id);
@@ -79,6 +80,9 @@ void MessageThread::run()
     {
         dest_node_id = dest[i];
 
+        /*
+        NOTE: #define ISSERVER (g_node_id < g_node_cnt)
+        */
         if (ISSERVER)
         {
             if (dest_node_id % g_this_send_thread_cnt != td_id)
@@ -117,6 +121,19 @@ void MessageThread::run()
 
         if (sbuf->starttime == 0)
             sbuf->starttime = get_sys_clock();
+
+
+        #if T_PROPOSE
+        if (msg->rtype == BATCH_REQ){
+          cout << "Sending proposal " << msg->txn_id << " to " << dest_node_id << endl;
+        }
+        #endif
+
+        #if TENDERMINT
+        if (msg->rtype == PBFT_PREP_MSG){
+            cout << "Sending prep message " << msg->txn_id << " to " << dest_node_id << endl;
+        }
+        #endif
 
         check_and_send_batches();
     }

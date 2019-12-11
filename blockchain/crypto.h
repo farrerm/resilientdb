@@ -355,6 +355,10 @@ inline bool CmacVerifyString(const std::string &aPublicKeyStrHex,
 {
     bool res = true;
 
+    #if SKIP_VALIDATE
+      return res;
+    #endif
+
     fflush(stdout);
     // KEY TRANSFORMATION
     //https://stackoverflow.com/questions/26145776/string-to-secbyteblock-conversion

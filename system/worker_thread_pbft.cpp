@@ -84,6 +84,15 @@ RC WorkerThread::process_batch(Message *msg)
     // Check if the message is valid.
     validate_msg(breq);
 
+    #if T_PROPOSE
+    if(g_node_id == 1 || g_node_id == 3){
+      // Pass on the proposal to node 2. Unfinished.
+      ClientQueryBatch *clbtch = (ClientQueryBatch *)msg;
+      create_and_send_batchreq(clbtch, clbtch->txn_id);
+    }
+    #endif
+
+
 #if VIEW_CHANGES
     // Store the batch as it could be needed during view changes.
     store_batch_msg(breq);
@@ -98,6 +107,7 @@ RC WorkerThread::process_batch(Message *msg)
 #endif
 
     // Send Prepare messages.
+    //NOTE: initial sending. And we should only use this one time.
     txn_man->send_pbft_prep_msgs();
 
     // End the counter for pre-prepare phase as prepare phase starts next.
@@ -105,20 +115,23 @@ RC WorkerThread::process_batch(Message *msg)
     INC_STATS(get_thd_id(), time_pre_prepare, timepre);
 
     // Only when BatchRequests message comes after some Prepare message.
-    // NOTE: check received messages.
     for (uint64_t i = 0; i < txn_man->info_prepare.size(); i++)
     {
         // Decrement.
-        #if TENDERMINT
-        cout << "Counting message: " << breq->txn_id << " from "  << txn_man->info_prepare.at(i) << endl;
-        #endif
         uint64_t num_prep = txn_man->decr_prep_rsp_cnt();
         if (num_prep == 0)
         {
-            #if TENDERMINT
-            cout << "DebugPBFT: I am officially prepared, " << breq->txn_id << endl;
-            #endif
             txn_man->set_prepared();
+            #if TENDERMINT
+              #if TENDERMINT_TEST
+                cout << "Some msgs arrive earlier than the block. Got prepared because of ";
+                for(uint64_t i=0; i < txn_man->sent_prep.size(); i++){
+                  cout <<  txn_man->sent_prep.at(i) << " ";
+                }
+                cout << endl;
+              #endif
+            txn_man->sent_prep.clear();
+            #endif
             break;
         }
     }
@@ -215,11 +228,7 @@ RC WorkerThread::process_pbft_prep_msg(Message *msg)
     validate_msg(pmsg);
 
     // Check if sufficient number of Prepare messages have arrived.
-    if (prepared(pmsg))
-    {
-        #if TENDERMINT
-        cout << "Ready to send commit. The index: " << pmsg->index << " ,and the prepare message sender is " << pmsg->return_node << endl;
-        #endif
+    if (prepared(pmsg)){
         // Send Commit messages.
         txn_man->send_pbft_commit_msgs();
 
@@ -256,20 +265,7 @@ bool WorkerThread::committed_local(PBFTCommitMessage *msg)
     {
         //cout << "hash empty: " << txn_man->get_txn_id() << "\n";
         //fflush(stdout);
-        #if TENDERMINT
-          /*
-          if (count(txn_man->info_commit.begin(), txn_man->info_commit.end(), msg->return_node)){
-            cout << "Debug: Already got the commit message. " << endl;
-          }
-          else{
-            txn_man->info_commit.push_back(msg->return_node);
-            txn_man->send_pbft_commit_msgs();
-            cout << "gossiping commit works? " << msg->txn_id << endl;
-          }*/
-          txn_man->info_commit.push_back(msg->return_node);
-        #else
-          txn_man->info_commit.push_back(msg->return_node);
-        #endif
+        txn_man->info_commit.push_back(msg->return_node);
         //NOTE: modification - whether should we pass on commit messages.
         return false;
     }

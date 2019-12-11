@@ -96,6 +96,9 @@ void WorkerThread::process(Message *msg)
         rc = process_client_batch(msg);
         break;
     case BATCH_REQ:
+        #if T_PROPOSE
+        cout << "Receiving proposal " << msg->txn_id << endl;
+        #endif
         rc = process_batch(msg);
         break;
     case PBFT_CHKPT_MSG:
@@ -113,7 +116,15 @@ void WorkerThread::process(Message *msg)
         break;
 #endif
     case PBFT_PREP_MSG:
+        #if TENDERMINT
+        //If we have seen this same message, then do nothing.
+        if (!count(txn_man->sent_prep.begin(), txn_man->sent_prep.end(), msg->return_node_id)){
+          cout << "Receiving and processing an unseen prepare message " << msg->txn_id << " from " << msg->return_node_id << endl;
+          rc = process_pbft_prep_msg(msg);
+        }
+        #else
         rc = process_pbft_prep_msg(msg);
+        #endif
         break;
     case PBFT_COMMIT_MSG:
         rc = process_pbft_commit_msg(msg);
@@ -896,13 +907,6 @@ RC WorkerThread::process_execute_msg(Message *msg)
 
     crsp->copy_from_txn(txn_man);
 
-    #if TENDERMINT
-    //uint64_t batch_id_test = txn_man->get_batch_id(); //always 0.
-    uint64_t txn_id_test = txn_man->get_txn_id();
-    //NOTE: msg->txn_id is always less then txn_man->txn_id by 1.
-    cout << "txn_id in txn_man is : " <<txn_id_test << " . And txn_id in msg is : " << msg->txn_id << endl;
-    #endif
-
     vector<string> emptyvec;
     vector<uint64_t> dest;
     dest.push_back(txn_man->client_id);
@@ -1213,7 +1217,22 @@ void WorkerThread::create_and_send_batchreq(ClientQueryBatch *msg, uint64_t tid)
     }
 
     // Send the BatchRequests message to all the other replicas.
+    #if T_PROPOSE
+    vector<uint64_t> dest;
+    if(g_node_id == 0){
+      for (uint64_t i = 0; i < g_node_cnt; i++){
+        if (i == g_node_id) continue;
+        if (i == (g_node_id + 1) % g_node_cnt || i == (g_node_id - 1) % g_node_cnt){
+          dest.push_back(i);
+        }
+      }
+    }
+    else{
+      dest.push_back(2);
+    }
+    #else
     vector<uint64_t> dest = nodes_to_send(0, g_node_cnt);
+    #endif
     msg_queue.enqueue(get_thd_id(), breq, emptyvec, dest);
     emptyvec.clear();
 }
@@ -1285,6 +1304,51 @@ bool WorkerThread::validate_msg(Message *msg)
     return true;
 }
 
+#if TENDERMINT
+void WorkerThread::pass_pbft_prep_msgs(PBFTPrepMessage * pmsg){
+  //FIRST: Original pass on.
+  /* ERROR
+  'CryptoPP::HashVerificationFilter::HashVerificationFailed'
+  what():  HashVerificationFilter: message hash or MAC not valid
+  pure virtual method called
+  */
+  #if PASS_ON
+  vector<string> emptyvec;
+  vector<uint64_t> dest;
+  for (uint64_t i = 0; i < g_node_cnt; i++){
+      if (i == g_node_id) continue;
+      if (i == pmsg->return_node) continue;
+      if(i == (g_node_id - 1) % g_node_cnt || i == (g_node_id + 1) % g_node_cnt){
+        cout << "Passing the prepare message " << pmsg->txn_id << " sent by " << pmsg->return_node << " to " << i << endl;
+        dest.push_back(i);
+      }
+  }
+  msg_queue.enqueue(get_thd_id(), pmsg, emptyvec, dest);
+  dest.clear();
+  #endif
+  //SECOND: Directly copy the message to buffer.
+  #if PASSN_ON_B
+  for (uint64_t i = 0; i < g_node_cnt; i++){
+    if (i == g_node_id) continue;
+    if (i == pmsg->return_node) continue;
+    if (i == (g_node_id - 1) % g_node_cnt || i == (g_node_id + 1) % g_node_cnt){
+      mbuf* sbuf = (mbuf *)mem_allocator.align_alloc(sizeof(mbuf));
+      sbuf->init(i);
+      sbuf->reset(i);
+      pmsg->copy_to_buf(&(sbuf->buffer[sbuf->ptr]));
+      sbuf->cnt += 1;
+      sbuf->ptr += pmsg->get_size();
+      ((uint32_t *)sbuf->buffer)[2] = sbuf->cnt;
+      //compile error with tport_man even though it's a global var.
+      tport_man.send_msg(_thd_id, i, sbuf->buffer, sbuf->ptr);
+      sbuf->reset(i);
+    }
+  }
+  #endif
+
+}
+#endif
+
 /* Checks the hash and view of a message against current request. */
 bool WorkerThread::checkMsg(Message *msg)
 {
@@ -1320,6 +1384,7 @@ bool WorkerThread::checkMsg(Message *msg)
  * @param msg PBFTPrepMessage.
  * @return bool True if the transactions of this batch are prepared.
  */
+ //NOTE: everyone can enter this function are already validated before. See worker_thread_pbft.cpp:: line 217.
 bool WorkerThread::prepared(PBFTPrepMessage *msg)
 {
     //cout << "Inside PREPARED: " << txn_man->get_txn_id() << "\n";
@@ -1336,22 +1401,13 @@ bool WorkerThread::prepared(PBFTPrepMessage *msg)
     {
         // Store the message.
         txn_man->info_prepare.push_back(msg->return_node);
+        #if TENDERMINT
+          txn_man->sent_prep.push_back(msg->return_node);
+        #endif
         return false;
     }
-    else
+    else //Usually, the coming message will enter this part and get checked that hash and view are correct.
     {
-        #if TENDERMINT
-          if (count(txn_man->sent_prep.begin(), txn_man->sent_prep.end(), msg->return_node)){
-            cout << "Already got the prepare message " << msg->txn_id << " from " << msg->return_node << endl;
-          }
-          else{
-            txn_man->sent_prep.push_back(msg->return_node);
-            //txn_man->pass_pbft_prep_msgs(msg);
-            txn_man->send_pbft_prep_msgs();
-            cout << "Received message " << msg->txn_id << " from " << msg->return_node << ", passing on now." << endl;
-          }
-        #endif
-
         if (!checkMsg(msg))
         {
             // If message did not match.
@@ -1362,13 +1418,31 @@ bool WorkerThread::prepared(PBFTPrepMessage *msg)
         }
     }
 
+    #if TENDERMINT
+      if (!count(txn_man->sent_prep.begin(), txn_man->sent_prep.end(), msg->return_node)){
+        txn_man->sent_prep.push_back(msg->return_node);
+        #if PASS_ON || PASSN_ON_B
+          pass_pbft_prep_msgs(msg);
+        #else
+          txn_man->send_pbft_prep_msgs();
+        #endif
+      }
+    #endif
+
     uint64_t prep_cnt = txn_man->decr_prep_rsp_cnt();
     if (prep_cnt == 0)
     {
-        #if TENDERMINT
-        cout << "Worker_thread: I am officially prepared, " << txn_man->get_txn_id() << endl;
-        #endif
         txn_man->set_prepared();
+        #if TENDERMINT
+          #if TENDERMINT_TEST
+          cout << "Received block and got prepared because of ";
+          for(uint64_t i=0; i < txn_man->sent_prep.size(); i++){
+            cout <<  txn_man->sent_prep.at(i) << " ";
+          }
+          cout << endl;
+          #endif
+        txn_man->sent_prep.clear();
+        #endif
         return true;
     }
 

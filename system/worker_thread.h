@@ -63,6 +63,9 @@ public:
 
     bool prepared(PBFTPrepMessage *msg);
     RC process_pbft_prep_msg(Message *msg);
+    #if TENDERMINT
+    void pass_pbft_prep_msgs(PBFTPrepMessage *msg);
+    #endif
 
     bool committed_local(PBFTCommitMessage *msg);
     RC process_pbft_commit_msg(Message *msg);
