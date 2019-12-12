@@ -438,6 +438,36 @@ void TxnManager::send_pbft_prep_msgs()
     dest.clear();
 }
 
+#if TENDERMINT
+void TxnManager::pass_pbft_prep_msgs(PBFTPrepMessage *pmsg){
+  #if PASS_ON
+  vector<string> emptyvec;
+  vector<uint64_t> pass_dest;
+
+  for (uint64_t i = 0; i < g_node_cnt; i++){
+      if (i == g_node_id) continue;
+      if (i == pmsg->return_node) continue;
+      if(i == (g_node_id - 1) % g_node_cnt || i == (g_node_id + 1) % g_node_cnt){
+        cout << "Passing the prepare message " << pmsg->txn_id << " sent by " << pmsg->return_node << " to " << i << endl;
+        pass_dest.push_back(i);
+      }
+  }
+  if(pass_dest.size() == 0){
+    cout << "Here is the dest bug lol" << endl;
+  }
+  else{
+    cout << "Printing dest in txn: ";
+    for (uint64_t i = 0; i < pass_dest.size(); i++){
+      cout << pass_dest.at(i) << " ";
+    }
+    cout << endl;
+  }
+  msg_queue.enqueue(get_thd_id(), pmsg, emptyvec, pass_dest);
+  pass_dest.clear();
+  #endif
+}
+#endif
+
 
 //broadcasts commit message to all nodes
 void TxnManager::send_pbft_commit_msgs()

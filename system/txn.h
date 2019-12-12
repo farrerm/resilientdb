@@ -150,6 +150,9 @@ public:
     void set_prepared();
 
     void send_pbft_prep_msgs();
+    #if TENDERMINT
+    void pass_pbft_prep_msgs(PBFTPrepMessage *pmsg);
+    #endif
 
     uint64_t commit_rsp_cnt;
     bool committed_local = false;

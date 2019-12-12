@@ -1304,19 +1304,19 @@ bool WorkerThread::validate_msg(Message *msg)
 
     return true;
 }
-
+/*
 #if TENDERMINT
 void WorkerThread::pass_pbft_prep_msgs(PBFTPrepMessage * pmsg){
   //FIRST: Original pass on.
-  /* ERROR
+   ERROR
   'CryptoPP::HashVerificationFilter::HashVerificationFailed'
   what():  HashVerificationFilter: message hash or MAC not valid
   pure virtual method called
-  */
+
   #if PASS_ON
   vector<string> emptyvec;
   vector<uint64_t> pass_dest;
-  pass_dest.clear();
+
   for (uint64_t i = 0; i < g_node_cnt; i++){
       if (i == g_node_id) continue;
       if (i == pmsg->return_node) continue;
@@ -1336,6 +1336,7 @@ void WorkerThread::pass_pbft_prep_msgs(PBFTPrepMessage * pmsg){
     cout << endl;
   }
   msg_queue.enqueue(get_thd_id(), pmsg, emptyvec, pass_dest);
+  pass_dest.clear();
   #endif
   //SECOND: Directly copy the message to buffer.
   #if PASSN_ON_B
@@ -1359,7 +1360,7 @@ void WorkerThread::pass_pbft_prep_msgs(PBFTPrepMessage * pmsg){
 
 }
 #endif
-
+*/
 /* Checks the hash and view of a message against current request. */
 bool WorkerThread::checkMsg(Message *msg)
 {
@@ -1433,7 +1434,7 @@ bool WorkerThread::prepared(PBFTPrepMessage *msg)
       if (!count(txn_man->sent_prep.begin(), txn_man->sent_prep.end(), msg->return_node)){
         txn_man->sent_prep.push_back(msg->return_node);
         #if PASS_ON || PASSN_ON_B
-          pass_pbft_prep_msgs(msg);
+          txn_man->pass_pbft_prep_msgs(msg);
         #else
           txn_man->send_pbft_prep_msgs();
         #endif

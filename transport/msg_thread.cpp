@@ -51,14 +51,14 @@ void MessageThread::run()
 {
     Message *msg = NULL;
     uint64_t dest_node_id;
-    vector<uint64_t> dest;
+    vector<uint64_t> pass_dest;
     vector<string> allsign;
     mbuf *sbuf;
 
     // Relative Id of the server's output thread.
     UInt32 td_id = _thd_id % g_this_send_thread_cnt;
 
-    dest = msg_queue.dequeue(get_thd_id(), allsign, msg);
+    pass_dest = msg_queue.dequeue(get_thd_id(), allsign, msg);
 
     if (!msg)
     {
@@ -78,21 +78,22 @@ void MessageThread::run()
 
     //#if TENDERMINT
     if (msg->rtype == PBFT_PREP_MSG){
+      cout << "Checking thread_id: " << get_thd_id() << endl;
       cout << "Sending prep message " << msg->txn_id << endl;
       cout << "Printing dest in msg_thread: ";
-      if(dest.size()==0) cout << "Bug encountered. " << endl;
+      if(pass_dest.size()==0) cout << "Bug encountered. " << endl;
       else{
-        for (uint64_t i = 0; i < dest.size(); i++){
-          cout << dest.at(i) << " ";
+        for (uint64_t i = 0; i < pass_dest.size(); i++){
+          cout << pass_dest.at(i) << " ";
         }
         cout << endl;
       }
     }
     //#endif
 
-    for (uint64_t i = 0; i < dest.size(); i++)
+    for (uint64_t i = 0; i < pass_dest.size(); i++)
     {
-        dest_node_id = dest[i];
+        dest_node_id = pass_dest[i];
 
         /*
         NOTE: #define ISSERVER (g_node_id < g_node_cnt)
