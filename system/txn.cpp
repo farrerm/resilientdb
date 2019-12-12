@@ -419,8 +419,9 @@ void TxnManager::send_pbft_prep_msgs()
     vector<string> emptyvec;
     vector<uint64_t> dest;
     //NOTE: modification - gossiping prepare messages to replicas. Define neighbors here.
-
+    #if TENDERMINT
     pmsg->passer = -1;
+    #endif
 
     for (uint64_t i = 0; i < g_node_cnt; i++)
     {
