@@ -99,10 +99,10 @@ RC WorkerThread::process_batch(Message *msg)
     // Send Prepare messages Tendermint(*Lakhveer) 
     //ch 
 #if TENDERMINT
-    if (getLockedRound() == -1 || getLockedValue() == (int)msg->txn_id){
+   // if (getLockedRound() == -1 || getLockedValue() == (int)msg->txn_id){
         txn_man->send_pbft_prep_msgs();
         //Start clock
-    }
+  //  }
 #else
     txn_man->send_pbft_prep_msgs();
 #endif
@@ -226,9 +226,9 @@ RC WorkerThread::process_pbft_prep_msg(Message *msg)
         // - locked round <= vr
         //Send preperae message
         //L29 on pseudocode
-        if (getLockedRound() <= msg->lockedRound || getLockedValue() == (int)msg->txn_id){
+       // if (getLockedRound() <= msg->lockedRound || getLockedValue() == (int)msg->txn_id){
              txn_man->send_pbft_prep_msgs();
-        }
+        //}
         setLockedRound((int)tRound);
         setLockedValue((int)msg->txn_id);
         cout << "Locking round: " << getLockedRound() << endl;
