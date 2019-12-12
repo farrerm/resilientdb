@@ -142,6 +142,7 @@ public:
     vector<uint64_t> info_prepare;
     #if TENDERMINT
     vector<uint64_t> sent_prep;
+    vector<uint64_t> seen_prep;
     #endif
 
     uint64_t decr_prep_rsp_cnt();
@@ -151,7 +152,11 @@ public:
 
     void send_pbft_prep_msgs();
     #if TENDERMINT
-    void pass_pbft_prep_msgs(PBFTPrepMessage *pmsg);
+      #if T_MSG
+      void pass_pbft_prep_msgs(uint64_t node_id, uint64_t dest_id);
+      #else
+      void pass_pbft_prep_msgs(PBFTPrepMessage *pmsg);
+      #endif
     #endif
 
     uint64_t commit_rsp_cnt;

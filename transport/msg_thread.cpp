@@ -76,20 +76,27 @@ void MessageThread::run()
     }
     assert(msg);
 
-    //#if TENDERMINT
+    #if TENDERMINT
     if (msg->rtype == PBFT_PREP_MSG){
-      cout << "Checking thread_id: " << get_thd_id() << endl;
-      cout << "Sending prep message " << msg->txn_id << endl;
-      cout << "Printing dest in msg_thread: ";
-      if(pass_dest.size()==0) cout << "Bug encountered. " << endl;
-      else{
-        for (uint64_t i = 0; i < pass_dest.size(); i++){
-          cout << pass_dest.at(i) << " ";
-        }
-        cout << endl;
+      cout << "Sending prep message " << msg->txn_id << " from " << msg->return_node_id << " to ";
+      for (uint64_t i = 0; i < pass_dest.size(); i++){
+        cout << pass_dest[i] << " ";
       }
+      cout << endl;
+      #if T_MSG
+        cout << "The passer is " << msg->passer << endl;
+      #else
+        cout << "Printing dest in msg_thread: ";
+        if(pass_dest.size()==0) cout << "Bug encountered. " << endl;
+        else{
+          for (uint64_t i = 0; i < pass_dest.size(); i++){
+            cout << pass_dest.at(i) << " ";
+          }
+          cout << endl;
+        }
+      #endif
     }
-    //#endif
+    #endif
 
     for (uint64_t i = 0; i < pass_dest.size(); i++)
     {

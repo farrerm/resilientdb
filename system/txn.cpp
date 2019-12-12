@@ -408,6 +408,7 @@ void TxnManager::send_pbft_prep_msgs()
     Message *msg = Message::create_message(this, PBFT_PREP_MSG);
     PBFTPrepMessage *pmsg = (PBFTPrepMessage *)msg;
 
+
 #if LOCAL_FAULT == true || VIEW_CHANGES
     if (get_prep_rsp_cnt() > 0)
     {
@@ -419,6 +420,8 @@ void TxnManager::send_pbft_prep_msgs()
     vector<uint64_t> dest;
     //NOTE: modification - gossiping prepare messages to replicas. Define neighbors here.
 
+    pmsg->passer = -1;
+
     for (uint64_t i = 0; i < g_node_cnt; i++)
     {
         if (i == g_node_id)
@@ -429,8 +432,12 @@ void TxnManager::send_pbft_prep_msgs()
         #if TENDERMINT
           if(i == (g_node_id + 1) % g_node_cnt || i == (g_node_id - 1) % g_node_cnt){
               dest.push_back(i);
+              #if T_MSG
+              #endif
           }
         #else
+          #if T_MSG
+          #endif
           dest.push_back(i);
         #endif
     }
@@ -439,33 +446,71 @@ void TxnManager::send_pbft_prep_msgs()
 }
 
 #if TENDERMINT
-void TxnManager::pass_pbft_prep_msgs(PBFTPrepMessage *pmsg){
-  #if PASS_ON
-  vector<string> emptyvec;
-  vector<uint64_t> pass_dest;
+  #if T_MSG
+  void TxnManager::pass_pbft_prep_msgs(uint64_t node_id, uint64_t dest_id){
+    Message *msg = Message::create_message(this, PBFT_PREP_MSG);
+    PBFTPrepMessage *pmsg = (PBFTPrepMessage *)msg;
+    pmsg->set_return_id(node_id);
+    cout << "The message sender has been set to " << pmsg->return_node << endl;
 
-  for (uint64_t i = 0; i < g_node_cnt; i++){
+    pmsg->passer = g_node_id;
+
+    vector<string> emptyvec;
+    vector<uint64_t> dest;
+    dest.push_back(dest_id);
+
+    msg_queue.enqueue(get_thd_id(), pmsg, emptyvec, dest);
+    dest.clear();
+  }
+  #else
+  void TxnManager::pass_pbft_prep_msgs(PBFTPrepMessage *pmsg){
+    //FIRST: Pass on the message.
+    #if PASS_ON
+    vector<string> emptyvec;
+    vector<uint64_t> pass_dest;
+
+    for (uint64_t i = 0; i < g_node_cnt; i++){
+        if (i == g_node_id) continue;
+        if (i == pmsg->return_node) continue;
+        if(i == (g_node_id - 1) % g_node_cnt || i == (g_node_id + 1) % g_node_cnt){
+          cout << "Passing the prepare message " << pmsg->txn_id << " sent by " << pmsg->return_node << " to " << i << endl;
+          pass_dest.push_back(i);
+        }
+    }
+    if(pass_dest.size() == 0){
+      cout << "Here is the dest bug lol" << endl;
+    }
+    else{
+      cout << "Printing dest in txn.cpp: ";
+      for (uint64_t i = 0; i < pass_dest.size(); i++){
+        cout << pass_dest.at(i) << " ";
+      }
+      cout << endl;
+    }
+    msg_queue.enqueue(get_thd_id(), pmsg, emptyvec, pass_dest);
+    pass_dest.clear();
+    #endif
+    //SECOND: Directly copy the message to buffer.
+    #if PASSN_ON_B
+    for (uint64_t i = 0; i < g_node_cnt; i++){
       if (i == g_node_id) continue;
       if (i == pmsg->return_node) continue;
-      if(i == (g_node_id - 1) % g_node_cnt || i == (g_node_id + 1) % g_node_cnt){
-        cout << "Passing the prepare message " << pmsg->txn_id << " sent by " << pmsg->return_node << " to " << i << endl;
-        pass_dest.push_back(i);
+      if (i == (g_node_id - 1) % g_node_cnt || i == (g_node_id + 1) % g_node_cnt){
+        mbuf* sbuf = (mbuf *)mem_allocator.align_alloc(sizeof(mbuf));
+        sbuf->init(i);
+        sbuf->reset(i);
+        pmsg->copy_to_buf(&(sbuf->buffer[sbuf->ptr]));
+        sbuf->cnt += 1;
+        sbuf->ptr += pmsg->get_size();
+        ((uint32_t *)sbuf->buffer)[2] = sbuf->cnt;
+        //compile error with tport_man even though it's a global var.
+        tport_man.send_msg(_thd_id, i, sbuf->buffer, sbuf->ptr);
+        sbuf->reset(i);
       }
-  }
-  if(pass_dest.size() == 0){
-    cout << "Here is the dest bug lol" << endl;
-  }
-  else{
-    cout << "Printing dest in txn: ";
-    for (uint64_t i = 0; i < pass_dest.size(); i++){
-      cout << pass_dest.at(i) << " ";
     }
-    cout << endl;
+    #endif
   }
-  msg_queue.enqueue(get_thd_id(), pmsg, emptyvec, pass_dest);
-  pass_dest.clear();
   #endif
-}
 #endif
 
 

@@ -122,6 +122,9 @@ void WorkerThread::process(Message *msg)
           cout << "Receiving and processing an unseen prepare message " << msg->txn_id << " from " << msg->return_node_id << endl;
           rc = process_pbft_prep_msg(msg);
         }
+        else{
+          cout << "Blocked an seen prepare message " << msg->txn_id << " from " << msg->return_node_id << endl;
+        }
         #else
         cout << "Receiving a prepare message " << msg->txn_id << " from " << msg->return_node_id << endl;
         rc = process_pbft_prep_msg(msg);
@@ -1304,63 +1307,7 @@ bool WorkerThread::validate_msg(Message *msg)
 
     return true;
 }
-/*
-#if TENDERMINT
-void WorkerThread::pass_pbft_prep_msgs(PBFTPrepMessage * pmsg){
-  //FIRST: Original pass on.
-   ERROR
-  'CryptoPP::HashVerificationFilter::HashVerificationFailed'
-  what():  HashVerificationFilter: message hash or MAC not valid
-  pure virtual method called
 
-  #if PASS_ON
-  vector<string> emptyvec;
-  vector<uint64_t> pass_dest;
-
-  for (uint64_t i = 0; i < g_node_cnt; i++){
-      if (i == g_node_id) continue;
-      if (i == pmsg->return_node) continue;
-      if(i == (g_node_id - 1) % g_node_cnt || i == (g_node_id + 1) % g_node_cnt){
-        cout << "Passing the prepare message " << pmsg->txn_id << " sent by " << pmsg->return_node << " to " << i << endl;
-        pass_dest.push_back(i);
-      }
-  }
-  if(pass_dest.size() == 0){
-    cout << "Here is the dest bug lol" << endl;
-  }
-  else{
-    cout << "Printing dest in worker_thread: ";
-    for (uint64_t i = 0; i < pass_dest.size(); i++){
-      cout << pass_dest.at(i) << " ";
-    }
-    cout << endl;
-  }
-  msg_queue.enqueue(get_thd_id(), pmsg, emptyvec, pass_dest);
-  pass_dest.clear();
-  #endif
-  //SECOND: Directly copy the message to buffer.
-  #if PASSN_ON_B
-  for (uint64_t i = 0; i < g_node_cnt; i++){
-    if (i == g_node_id) continue;
-    if (i == pmsg->return_node) continue;
-    if (i == (g_node_id - 1) % g_node_cnt || i == (g_node_id + 1) % g_node_cnt){
-      mbuf* sbuf = (mbuf *)mem_allocator.align_alloc(sizeof(mbuf));
-      sbuf->init(i);
-      sbuf->reset(i);
-      pmsg->copy_to_buf(&(sbuf->buffer[sbuf->ptr]));
-      sbuf->cnt += 1;
-      sbuf->ptr += pmsg->get_size();
-      ((uint32_t *)sbuf->buffer)[2] = sbuf->cnt;
-      //compile error with tport_man even though it's a global var.
-      tport_man.send_msg(_thd_id, i, sbuf->buffer, sbuf->ptr);
-      sbuf->reset(i);
-    }
-  }
-  #endif
-
-}
-#endif
-*/
 /* Checks the hash and view of a message against current request. */
 bool WorkerThread::checkMsg(Message *msg)
 {
@@ -1431,14 +1378,35 @@ bool WorkerThread::prepared(PBFTPrepMessage *msg)
     }
 
     #if TENDERMINT
-      if (!count(txn_man->sent_prep.begin(), txn_man->sent_prep.end(), msg->return_node)){
-        txn_man->sent_prep.push_back(msg->return_node);
-        #if PASS_ON || PASSN_ON_B
-          txn_man->pass_pbft_prep_msgs(msg);
-        #else
-          txn_man->send_pbft_prep_msgs();
-        #endif
+    if (!count(txn_man->sent_prep.begin(), txn_man->sent_prep.end(), msg->return_node)){
+      txn_man->sent_prep.push_back(msg->return_node);
+      cout << "Debug: " << txn_man->get_txn_id() << " current sent_prep ";
+      for(uint64_t i=0; i < txn_man->sent_prep.size(); i++){
+        cout <<  txn_man->sent_prep.at(i) << " ";
       }
+      cout << endl;
+      cout << "Debug: " << txn_man->get_txn_id() << " current seen_prep ";
+      for(uint64_t i=0; i < txn_man->seen_prep.size(); i++){
+        cout <<  txn_man->seen_prep.at(i) << " ";
+      }
+      cout << endl;
+      #if PASS_ON || PASSN_ON_B
+          txn_man->pass_pbft_prep_msgs(msg);
+      #else
+      for(uint64_t i=0; i < g_node_cnt;i++){
+        if(i == g_node_id) continue;
+        if(i == (g_node_id + 1) % g_node_cnt || i == (g_node_id - 1) % g_node_cnt){
+          cout << "Debug: why 1 is here : " << i << endl;
+          if(i == msg->return_node) continue;
+          else{
+            cout << "Should create the message for " << msg->return_node << " to send to " << i << endl;
+            txn_man->pass_pbft_prep_msgs(msg->return_node, i);
+            //txn_man->send_pbft_prep_msgs();
+          }
+        }
+      }
+      #endif
+    }
     #endif
 
     uint64_t prep_cnt = txn_man->decr_prep_rsp_cnt();
@@ -1447,13 +1415,14 @@ bool WorkerThread::prepared(PBFTPrepMessage *msg)
         txn_man->set_prepared();
         #if TENDERMINT
           #if TENDERMINT_TEST
-          cout << "Received block and got prepared because of ";
+          cout << "Received block " << txn_man->get_txn_id() << " and got prepared because of ";
           for(uint64_t i=0; i < txn_man->sent_prep.size(); i++){
             cout <<  txn_man->sent_prep.at(i) << " ";
           }
           cout << endl;
           #endif
         txn_man->sent_prep.clear();
+        txn_man->seen_prep.clear();
         #endif
         return true;
     }

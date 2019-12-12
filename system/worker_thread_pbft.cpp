@@ -224,7 +224,11 @@ RC WorkerThread::process_pbft_prep_msg(Message *msg)
     }
 
     // Check if the incoming message is valid.
+    cout << "Debug: the msg sender is " << msg->return_node_id << endl;
+    txn_man->seen_prep.push_back(msg->return_node_id);
     PBFTPrepMessage *pmsg = (PBFTPrepMessage *)msg;
+    cout << "Debug: the pmsg sender is " << pmsg->return_node << endl;
+    msg->set_return_id(pmsg->return_node);
     validate_msg(pmsg);
 
     // Check if sufficient number of Prepare messages have arrived.

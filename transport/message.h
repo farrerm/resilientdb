@@ -43,6 +43,10 @@ public:
 
     vector<uint64_t> dest;
 
+    #if T_MSG
+    uint64_t passer;
+    #endif
+
     // Collect other stats
     double lat_work_queue_time;
     double lat_msg_queue_time;
@@ -61,6 +65,10 @@ public:
     void mcopy_from_txn(TxnManager *txn);
     void mcopy_to_txn(TxnManager *txn);
     RemReqType get_rtype() { return rtype; }
+
+    #if T_MSG
+    void set_return_id(uint64_t node_id) { return_node_id = node_id; }
+    #endif
 
     virtual uint64_t get_size() = 0;
     virtual void copy_from_buf(char *buf) = 0;
@@ -355,6 +363,10 @@ public:
 
     uint64_t end_index;
     uint32_t batch_size;
+
+    #if T_MSG
+    void set_return_id(uint64_t node_id){ return_node = node_id; }
+    #endif
 };
 
 class PBFTCommitMessage : public Message

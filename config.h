@@ -30,7 +30,7 @@
 #define TIME_PROF_ENABLE false
 #define FIN_BY_TIME true
 // Number of transactions each client should send without waiting.
-#define MAX_TXN_IN_FLIGHT 10
+#define MAX_TXN_IN_FLIGHT 20000 //10
 #define SERVER_GENERATE_QUERIES false
 #define MEM_ALLIGN 8
 #define THREAD_ALLOC false
@@ -155,11 +155,12 @@
 #define ZYZZYVA 3
 #define HOTSTUFF 4
 #define TENDERMINT true
-#define TENDERMINT_TEST false
+#define TENDERMINT_TEST true
 #define T_PROPOSE false
-#define PASS_ON true
+#define PASS_ON false
 #define PASS_ON_B false
-#define SKIP_VALIDATE true
+#define SKIP_VALIDATE false
+#define T_MSG true
 // Switching on RBFT consensus.
 // Status: Partial implementation, only for PBFT.
 #define RBFT_ON false
@@ -172,7 +173,7 @@
 // Number of threads to create batches at primary replica.
 #define BATCH_THREADS 2
 // Size of each batch.
-#define BATCH_SIZE 10
+#define BATCH_SIZE 100 //10
 #define BATCH_ENABLE BSET
 #define BSET 1
 #define BUNSET 0
