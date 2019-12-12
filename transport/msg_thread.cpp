@@ -76,6 +76,20 @@ void MessageThread::run()
     }
     assert(msg);
 
+    //#if TENDERMINT
+    if (msg->rtype == PBFT_PREP_MSG){
+      cout << "Sending prep message " << msg->txn_id << endl;
+      cout << "Printing dest in msg_thread: ";
+      if(dest.size()==0) cout << "Bug encountered. " << endl;
+      else{
+        for (uint64_t i = 0; i < dest.size(); i++){
+          cout << dest.at(i) << " ";
+        }
+        cout << endl;
+      }
+    }
+    //#endif
+
     for (uint64_t i = 0; i < dest.size(); i++)
     {
         dest_node_id = dest[i];
@@ -126,12 +140,6 @@ void MessageThread::run()
         #if T_PROPOSE
         if (msg->rtype == BATCH_REQ){
           cout << "Sending proposal " << msg->txn_id << " to " << dest_node_id << endl;
-        }
-        #endif
-
-        #if TENDERMINT
-        if (msg->rtype == PBFT_PREP_MSG){
-            cout << "Sending prep message " << msg->txn_id << " to " << dest_node_id << endl;
         }
         #endif
 

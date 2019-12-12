@@ -123,6 +123,7 @@ void WorkerThread::process(Message *msg)
           rc = process_pbft_prep_msg(msg);
         }
         #else
+        cout << "Receiving a prepare message " << msg->txn_id << " from " << msg->return_node_id << endl;
         rc = process_pbft_prep_msg(msg);
         #endif
         break;
@@ -1314,17 +1315,27 @@ void WorkerThread::pass_pbft_prep_msgs(PBFTPrepMessage * pmsg){
   */
   #if PASS_ON
   vector<string> emptyvec;
-  vector<uint64_t> dest;
+  vector<uint64_t> pass_dest;
+  pass_dest.clear();
   for (uint64_t i = 0; i < g_node_cnt; i++){
       if (i == g_node_id) continue;
       if (i == pmsg->return_node) continue;
       if(i == (g_node_id - 1) % g_node_cnt || i == (g_node_id + 1) % g_node_cnt){
         cout << "Passing the prepare message " << pmsg->txn_id << " sent by " << pmsg->return_node << " to " << i << endl;
-        dest.push_back(i);
+        pass_dest.push_back(i);
       }
   }
-  msg_queue.enqueue(get_thd_id(), pmsg, emptyvec, dest);
-  dest.clear();
+  if(pass_dest.size() == 0){
+    cout << "Here is the dest bug lol" << endl;
+  }
+  else{
+    cout << "Printing dest in worker_thread: ";
+    for (uint64_t i = 0; i < pass_dest.size(); i++){
+      cout << pass_dest.at(i) << " ";
+    }
+    cout << endl;
+  }
+  msg_queue.enqueue(get_thd_id(), pmsg, emptyvec, pass_dest);
   #endif
   //SECOND: Directly copy the message to buffer.
   #if PASSN_ON_B
